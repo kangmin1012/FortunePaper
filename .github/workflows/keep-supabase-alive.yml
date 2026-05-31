@@ -13,9 +13,7 @@ jobs:
       - name: Ping Supabase DB
         run: |
           response=$(curl -s -o /dev/null -w "%{http_code}" \
-            -X POST "${{ secrets.PING_ENDPOINT_URL }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Content-Type: application/json")
+            -X POST "${{ secrets.PING_ENDPOINT_URL }}")
 
           echo "Response status: $response"
 
