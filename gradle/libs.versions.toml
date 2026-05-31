@@ -1,5 +1,6 @@
 [versions]
 agp = "9.0.1"
+kakao = "2.20.6"
 android-compileSdk = "36"
 android-minSdk = "24"
 android-targetSdk = "36"
@@ -25,7 +26,11 @@ supabase = "3.1.4"
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 
+# Kakao
+kakao-user = { module = "com.kakao.sdk:v2-user", version.ref = "kakao" }
+
 # Koin
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
