@@ -10,6 +10,15 @@ class UserRepositoryImpl(
     private val userRemote: UserRemoteDataSource
 ) : UserRepository {
 
+    override suspend fun loginWithKakao(kakaoAccessToken: String): Result<Boolean> = runCatching {
+        userRemote.signInWithKakao(kakaoAccessToken)
+        val userId = requireNotNull(userRemote.currentUserId()) { "인증에 실패했습니다" }
+        val profile = userRemote.getUser(userId)
+        profile == null // true = 온보딩 필요
+    }
+
+    override fun isLoggedIn(): Boolean = userRemote.isLoggedIn()
+
     override suspend fun getCurrentUser(): Result<User> = runCatching {
         val userId = requireNotNull(userRemote.currentUserId()) { "로그인이 필요합니다" }
         val dto = requireNotNull(userRemote.getUser(userId)) { "사용자 정보를 찾을 수 없습니다" }

@@ -2,9 +2,14 @@ package com.fortune.paper.data.remote
 
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.user.UserSession
+import io.github.jan.supabase.functions.functions
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
+import io.ktor.client.call.body
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 @Serializable
 data class UserDto(
@@ -25,9 +30,37 @@ data class UserUpsert(
     val gender: String
 )
 
+@Serializable
+private data class KakaoAuthResponse(
+    val access_token: String,
+    val refresh_token: String,
+    val expires_in: Long,
+    val kakao_id: String
+)
+
 class UserRemoteDataSource(private val client: SupabaseClient) {
 
     fun currentUserId(): String? = client.auth.currentUserOrNull()?.id
+
+    fun isLoggedIn(): Boolean = client.auth.currentSessionOrNull() != null
+
+    suspend fun signInWithKakao(kakaoAccessToken: String) {
+        val response = client.functions.invoke(
+            function = "kakao-auth",
+            body = buildJsonObject { put("access_token", kakaoAccessToken) }
+        )
+        val authData = response.body<KakaoAuthResponse>()
+
+        client.auth.importSession(
+            UserSession(
+                accessToken = authData.access_token,
+                refreshToken = authData.refresh_token,
+                expiresIn = authData.expires_in,
+                tokenType = "bearer"
+            )
+        )
+        client.auth.retrieveUserForCurrentSession(updateSession = true)
+    }
 
     suspend fun getUser(userId: String): UserDto? {
         return client.postgrest["users"]

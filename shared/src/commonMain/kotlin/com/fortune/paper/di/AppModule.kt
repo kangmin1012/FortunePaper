@@ -10,8 +10,9 @@ import com.fortune.paper.domain.repository.UserRepository
 import com.fortune.paper.domain.usecase.GetTodayReportUseCase
 import com.fortune.paper.domain.usecase.RefreshReportUseCase
 import com.fortune.paper.domain.usecase.UpdateNotifyTimeUseCase
+import com.fortune.paper.presentation.login.LoginDependencies
+import com.fortune.paper.presentation.login.LoginViewModel
 import org.koin.core.module.dsl.factoryOf
-import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val dataModule = module {
@@ -28,4 +29,8 @@ val domainModule = module {
     factoryOf(::UpdateNotifyTimeUseCase)
 }
 
-val appModules = listOf(dataModule, domainModule)
+val presentationModule = module {
+    factory { LoginViewModel(LoginDependencies(userRepository = get(), kakaoAuth = get())) }
+}
+
+val appModules = listOf(dataModule, domainModule, presentationModule)
