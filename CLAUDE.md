@@ -50,3 +50,27 @@ export PATH="$JAVA_HOME/bin:$PATH"
 | `di.md` | Koin 모듈 구성 및 의존성 주입 규칙 |
 | `ui.md` | Composable 규칙, Material3 디자인 시스템, Coil 이미지 로딩 |
 | `secrets.md` | 민감한 키 저장 규칙 — local.properties 저장 전 체크리스트 |
+
+---
+
+## 작업 규칙
+
+- **Task 개발이 완료되면 항상 `.claude/rules/tasks.md` 문서를 업데이트한다.** 완료한 항목의 체크박스를 `[x]`(또는 상태 표기 `✅`)로 갱신하고, 실제 구현 상태와 문서가 어긋나지 않도록 유지한다.
+
+---
+
+## 디자인
+
+UI 개발 시 **`design/FortunePaper_Design/` 폴더를 디자인 기준으로 참고하여 개발한다.** 이 폴더는 포춘페이퍼 앱의 디자인 시스템과 실제 화면 시안을 담고 있다.
+
+| 경로 | 내용 |
+|------|------|
+| `design-system/colors_and_type.css` | 디자인 토큰 — 컬러(neutral·brand·날씨 등급), 타이포 스케일, spacing/radius/shadow/motion. `MaterialTheme` 토큰 매핑의 기준 |
+| `design-system/components.jsx` | 공통 컴포넌트 시안 |
+| `design-system/assets/grade-*.svg` | 날씨 5단계 등급 아이콘 (SUNNY/CLEAR/CLOUDY/RAINY/STORM) |
+| `Onboarding.html`, `screens.jsx` | 온보딩 플로우 화면 시안 |
+| `Daily Entry.html`, `daily-entry.jsx` | 리포트 메인 화면 시안 |
+| `Settings.html`, `settings.jsx` | 설정 화면 시안 |
+
+- `ui.md`의 "Material3 토큰 사용, 값 하드코딩 금지" 원칙을 유지하되, 토큰 값은 위 `colors_and_type.css`를 출처로 삼아 `MaterialTheme`에 매핑한다.
+- 화면 구현 전 해당 시안 파일(`*.html` / `*.jsx`)을 확인하고, 시안과 어긋나는 결정이 필요하면 사용자에게 먼저 확인한다.
