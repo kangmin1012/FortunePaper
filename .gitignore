@@ -19,3 +19,6 @@ captures
 node_modules/
 CLAUDE.local.md
 .claude/settings.local.json
+
+# Supabase CLI 로컬 상태
+supabase/.temp/
