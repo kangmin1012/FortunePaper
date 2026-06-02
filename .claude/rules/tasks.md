@@ -59,47 +59,49 @@
 > 단일 디바이스 안에서 진행되는 **7단계 스텝 플로우**. 상단 진행바 → 본문 → 하단 CTA의 일관된 리듬(`StepShell`). 마지막 "완료하기" → 별도 계산/공개 화면 없이 곧바로 메인 화면 진입.
 > `STEPS = ['welcome', 'value', 'name', 'birth', 'gender', 'time', 'notify']`
 
-### 공통 골격 (shared chrome)
-- [ ] `StepShell` — 상단바(뒤로/진행바/건너뛰기) + 본문 + 하단 CTA 레이아웃
-- [ ] `ProgressDots` — 7단계용 얇은 진행 바 (`(step+1)/total` 비율)
-- [ ] `FPButton` — 기본 CTA 버튼 (`disabled` 상태 포함)
-- [ ] `Wheel` — iOS 스타일 휠 피커 (생년월일용)
-- [ ] `KakaoLoginButton` — 카카오 디자인 가이드 준수(#FEE500, radius 12, 좌측 심볼)
+### 공통 골격 (shared chrome) — `presentation/onboarding/components/`
+- [x] `StepShell` — 상단바(뒤로 ‹/진행바/건너뛰기) + 본문 + 하단 CTA 레이아웃
+- [x] `OnboardingProgressBar` — 7단계용 얇은 진행 바 (`step.progress` 비율)
+- [x] `FPButton` — 기본 CTA 버튼 (`enabled`/`loading` 상태 포함)
+- [x] `WheelPicker` — 휠 피커 (생년월일용, LazyColumn + 중앙 밴드)
+- [x] `KakaoButton` — 카카오 색(#FEE500) 버튼
+- [x] `GradeStrip`/`HeroGradeIcon` — 날씨 등급 이모지 (SVG 대신 이모지로 대체)
 
-### 단계별 화면
-- [ ] **0. Welcome** — 브랜드 소개(히어로 SUNNY 아이콘 + 5단계 날씨 스트립) + **카카오 로그인 버튼** + 약관 고지
-  - Task 3의 `LoginScreen`을 이 Welcome 화면으로 **대체/흡수**한다 (확정 a안). 로그인 로직(`KakaoLoginAction`·`LoginViewModel`·`LoginDependencies`)은 재사용하고 UI만 Welcome 디자인으로 교체
-- [ ] **1. Value** — 가치 제안 3카드 (한 장의 리포트 / 사주 기반 / 매일 아침)
-- [ ] **2. Name** — 이름 입력 (필수, 최대 12자) → `users.name` 저장
-- [ ] **3. Birth** — 생년월일 휠 피커 (년 1950–2010 / 월 / 일), 필수
-- [ ] **4. Gender** — 성별 음양 카드 (여=음 / 남=여), 필수
-- [ ] **5. Time** — 태어난 시각 12시진(자~해), **선택 입력** (건너뛰기/"잘 모르겠어요" 가능) → `users.birth_time` 저장(미선택 시 null)
-- [ ] **6. Notify** — 알림 시간 4프리셋(06:30/07:30/08:30/09:30, 기본 07:30) → "완료하기" → `users.notify_time` 저장
+### 단계별 화면 — `presentation/onboarding/screens/`
+- [x] **0. Welcome** — 브랜드 소개(히어로 ☀️ + 5단계 날씨 스트립) + **카카오 로그인 버튼** + 약관 고지
+  - Task 3의 `LoginScreen`은 Welcome으로 대체됨 (a안). 로그인 로직은 `OnboardingLoginAction`으로 재구현
+- [x] **1. Value** — 가치 제안 3카드 (한 장의 리포트 / 사주 기반 / 매일 아침)
+- [x] **2. Name** — 이름 입력 (필수, 최대 12자) → `users.name` 저장
+- [x] **3. Birth** — 생년월일 휠 피커 (년 1950–2010 / 월 / 일), 필수
+- [x] **4. Gender** — 성별 음양 카드 (여=음 / 남=양), 필수
+- [x] **5. Time** — 태어난 시각 12시진(자~해), **선택 입력** (건너뛰기/"잘 모르겠어요") → `users.birth_time`(미선택 시 null)
+- [x] **6. Notify** — 알림 시간 4프리셋(06:30/07:30/08:30/09:30, 기본 07:30) → "완료하기" → `users.notify_time`
 
-### TOAD/MVI 구조
-- [ ] `OnboardingState` — `step` 인덱스 + 수집 필드(name, birth, gender, birthTime?, notifyTime) + 각 단계 유효성
-- [ ] `OnboardingEvent` — `NavigateToMain`, `ShowError` 등 일회성 이펙트
-- [ ] `OnboardingDependencies`
-- [ ] Actions (1액션 1파일)
-  - [ ] `NextStep` / `PrevStep` (단계 이동)
-  - [ ] `UpdateName` / `UpdateBirth` / `UpdateGender` / `UpdateBirthTime` / `UpdateNotifyTime`
-  - [ ] `SubmitOnboarding` — 필수값 검증 → `saveUser` + `updateNotifyTime` → `NavigateToMain`
-- [ ] `OnboardingViewModel` 작성
-- [ ] `OnboardingScreen` Composable (`StepShell` 기반 단계 렌더링)
-- [ ] `App()` 분기 연결 (로그인 후 프로필 없으면 온보딩, 있으면 리포트)
-- [ ] Koin 모듈 등록
+### TOAD/MVI 구조 — `presentation/onboarding/`
+- [x] `OnboardingState` — `step`(enum) + 수집 필드(name, birth Y/M/D, gender, birthTime?, notifyTime, kakaoId) + `canProceed` 유효성
+- [x] `OnboardingEvent` — `NavigateToMain`, `ShowError`
+- [x] `OnboardingDependencies`
+- [x] Actions (1액션 1파일)
+  - [x] `GoToNextStep` / `GoToPreviousStep` (단계 이동)
+  - [x] `SetName` / `SetBirthDate` / `SetGender` / `SetBirthTime` / `SetNotifyTime`
+  - [x] `OnboardingLoginAction` — 카카오 로그인 → 기존 유저는 메인, 신규는 Value로
+  - [x] `SubmitOnboarding` — 필수값 검증 → `saveUser` + `updateNotifyTime` → `NavigateToMain`
+- [x] `OnboardingViewModel` 작성
+- [x] `OnboardingScreen` Composable (`StepShell` 기반 단계 렌더링)
+- [x] `App()` 분기 연결 (로그인 후 프로필 없으면 온보딩, 있으면 메인) + `AppTheme`(Noto Sans KR + 디자인 토큰) 적용
+- [x] Koin 모듈 등록 (`OnboardingViewModel`)
 
 ### 데이터 모델 변경 (A안 확정 — 디자인 우선, 2026-06-02)
 > PRD §8 · architecture.md DB 스키마 갱신 완료. Task 2(DB 스키마)는 아래 마이그레이션으로 보강 필요.
 - [x] 마이그레이션 SQL 작성 — `supabase/migrations/20260602093000_add_name_and_birth_time_to_users.sql` (name NOT NULL + birth_time, CHECK 제약 포함)
-- [ ] **위 마이그레이션 원격 적용** — `supabase login` → `supabase link` → `supabase db push` (사용자 직접 실행 필요, 자격증명 요함)
+- [x] **위 마이그레이션 원격 적용** — 대시보드 SQL Editor로 적용 완료 (2026-06-02). `users.name`·`birth_time` 컬럼 생성 확인
 - [x] `UserDto` · `UserUpsert`에 `name` · `birth_time` 필드 추가
 - [x] `UserRepository.saveUser` / `UserRemoteDataSource.upsertUser` 시그니처에 `name` · `birthTime` 추가 + `User` 도메인 모델/`toDomain` 매핑 갱신
 - [ ] (참고) `fortune` Edge Function 프롬프트에 `birth_time` 반영 (Task 4 연계, null이면 정오 대표값)
 
 ### Welcome/로그인 통합 (a안 확정 — 2026-06-02)
-- [ ] Task 3의 `LoginScreen`을 Welcome 화면(온보딩 0단계)으로 대체 — UI는 Welcome 디자인, 로그인 로직은 기존 것 재사용
-- [ ] 로그인 성공 후 분기: 프로필 없으면 온보딩 1단계(Value)로 계속, 있으면 메인으로
+- [x] Task 3의 `LoginScreen`은 Welcome 화면(온보딩 0단계)으로 대체 — `App()`이 더 이상 `LoginScreen` 미사용 (`Login*` 파일은 잔존, 추후 정리 가능)
+- [x] 로그인 성공 후 분기: 프로필 없으면 온보딩 1단계(Value)로 계속, 있으면 메인으로 (`OnboardingLoginAction` + `App()` 프로필 프로브)
 
 ---
 
