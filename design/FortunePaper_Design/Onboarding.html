@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>FortunePaper · 첫 실행 온보딩</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="design-system/colors_and_type.css" />
+  <style>
+    html, body {
+      margin: 0; padding: 0;
+      background: #EEEEE6; min-height: 100vh;
+      font-family: var(--font-sans);
+      color: var(--text-primary);
+    }
+    body {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 40px 16px 64px;
+    }
+    .page-eyebrow {
+      font-size: 11px; letter-spacing: 0.16em; color: #6B7280;
+      text-transform: uppercase; font-weight: 600;
+    }
+    .page-title {
+      font-size: 28px; font-weight: 800; color: #111827;
+      letter-spacing: -0.02em; margin: 10px 0 6px;
+    }
+    .page-sub {
+      font-size: 14px; color: #6B7280; line-height: 1.6;
+      max-width: 560px; text-align: center;
+    }
+    .section-label {
+      font-size: 11px; letter-spacing: 0.16em; color: #6B7280;
+      text-transform: uppercase; font-weight: 600;
+      margin: 56px 0 22px;
+    }
+    .row {
+      display: flex; gap: 28px; flex-wrap: wrap; justify-content: center; align-items: flex-start;
+    }
+    .device-wrap { display: flex; flex-direction: column; align-items: center; }
+    .device-label {
+      font-size: 12px; color: #6B7280; margin-top: 12px; text-align: center;
+      font-weight: 500;
+    }
+    .device-label strong { color: #111827; font-weight: 700; }
+
+    /* Animations used inside the calculating screen */
+    @keyframes fp-spin   { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes fp-pulse  { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+    @keyframes fp-bar    { from { width: 0%; } to { width: 100%; } }
+  </style>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="design-system/ios-frame.jsx"></script>
+  <script type="text/babel" src="design-system/components.jsx"></script>
+  <script type="text/babel" src="screens.jsx"></script>
+  <script type="text/babel" src="daily-entry.jsx"></script>
+  <script type="text/babel" src="vendor/tweaks-panel.jsx"></script>
+
+  <script type="text/babel" data-presets="react">
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "welcomeStyle": "hero",
+      "showProgress": true,
+      "autoplay": false
+    }/*EDITMODE-END*/;
+
+    // Main screen the user lands on right after onboarding — Day 1, no streak.
+    function MainScreen({ name = '김민준' }) {
+      return (
+        <HomeShell title="포츈페이퍼">
+          <AwaitingScreen
+            onOpen={() => {}}
+            name={name}
+            dateText="2026. 05. 25"
+            dow="월요일"
+            streak={0}
+            style="paper"
+          />
+        </HomeShell>
+      );
+    }
+
+    function OnboardingFlow({ tweaks, onFinish, initialStep = 0, onStepChange }) {
+      const [step, setStep] = React.useState(initialStep);
+      const [name, setName] = React.useState('김민준');
+      const [birth, setBirth] = React.useState({ y: 1995, m: 4, d: 12 });
+      const [gender, setGender] = React.useState(null);
+      const [time, setTime] = React.useState(null);
+      const [notify, setNotify] = React.useState('07:30');
+
+      React.useEffect(() => { onStepChange && onStepChange(step); }, [step]);
+      React.useEffect(() => { setStep(initialStep); }, [initialStep]);
+
+      const last = STEPS.length - 1;
+      const go = (n) => setStep((s) => Math.min(last, Math.max(0, n)));
+      const next = () => {
+        if (step === last) { onFinish && onFinish(); }
+        else { go(step + 1); }
+      };
+      const back = () => go(step - 1);
+
+      const common = { step, total: STEPS.length };
+
+      switch (STEPS[step]) {
+        case 'welcome':
+          return <ScreenWelcome onNext={next} style={tweaks.welcomeStyle} />;
+        case 'value':
+          return <ScreenValue {...common} onNext={next} onBack={back} />;
+        case 'name':
+          return <ScreenName {...common} onNext={next} onBack={back} value={name} onChange={setName} />;
+        case 'birth':
+          return <ScreenBirth {...common} onNext={next} onBack={back} value={birth} onChange={setBirth} />;
+        case 'gender':
+          return <ScreenGender {...common} onNext={next} onBack={back} value={gender} onChange={setGender} />;
+        case 'time':
+          return <ScreenTime {...common} onNext={next} onBack={back} value={time} onChange={setTime} />;
+        case 'notify':
+          return <ScreenNotify {...common} onNext={next} onBack={back} value={notify} onChange={setNotify} />;
+        default:
+          return null;
+      }
+    }
+
+    // Static gallery frame — onboarding step OR the final main screen.
+    function GalleryFrame({ kind, stepIdx, label }) {
+      return (
+        <div className="device-wrap">
+          <IOSDevice>
+            {kind === 'main'
+              ? <MainScreen />
+              : <OnboardingFlow
+                  tweaks={{ welcomeStyle: 'hero', showProgress: true }}
+                  initialStep={stepIdx}
+                  onFinish={() => {}}
+                />}
+          </IOSDevice>
+          <div className="device-label">
+            <strong>{label.idx}</strong> · {label.text}
+          </div>
+        </div>
+      );
+    }
+
+    function App({ t }) {
+      // phase: 'onboarding' (step 0..6) | 'main' (post-onboarding destination)
+      const [phase, setPhase] = React.useState('onboarding');
+      const [currentStep, setCurrentStep] = React.useState(0);
+      const liveKey = React.useRef(0);
+
+      // Autoplay: cycle through onboarding steps → main → restart
+      React.useEffect(() => {
+        if (!t.autoplay) return;
+        const id = setInterval(() => {
+          if (phase === 'onboarding' && currentStep < STEPS.length - 1) {
+            setCurrentStep((s) => s + 1);
+          } else if (phase === 'onboarding') {
+            setPhase('main');
+          } else {
+            setPhase('onboarding'); setCurrentStep(0);
+          }
+          liveKey.current += 1;
+        }, 2600);
+        return () => clearInterval(id);
+      }, [t.autoplay, phase, currentStep]);
+
+      const stepLabels = [
+        '환영 — 브랜드 소개',
+        '가치 제안 — 3가지 약속',
+        '이름 입력',
+        '생년월일 — 휠 피커',
+        '성별 — 음양 카드',
+        '태어난 시각 — 12시진 (선택)',
+        '알림 시간 — 4가지 프리셋',
+      ];
+      const navItems = [
+        ...stepLabels.map((text, i) => ({ kind: 'step', idx: i, text })),
+        { kind: 'main', idx: STEPS.length, text: '메인 화면 — 첫날 대기 상태' },
+      ];
+
+      const isActive = (item) =>
+        item.kind === 'main' ? phase === 'main' : (phase === 'onboarding' && item.idx === currentStep);
+
+      const goTo = (item) => {
+        liveKey.current += 1;
+        if (item.kind === 'main') { setPhase('main'); }
+        else { setPhase('onboarding'); setCurrentStep(item.idx); }
+      };
+
+      return (
+        <div style={{ width: '100%', maxWidth: 1680 }}>
+          {/* Header */}
+          <div style={{ textAlign: 'center', marginBottom: 36 }}>
+            <div className="page-eyebrow">FortunePaper · First-run Onboarding</div>
+            <div className="page-title">첫 실행 온보딩 플로우</div>
+            <div className="page-sub" style={{ margin: '0 auto' }}>
+              앱을 처음 연 사용자가 거치는 7단계 흐름. 알림 설정을 마치면 곧바로 메인 화면으로 진입합니다.
+            </div>
+          </div>
+
+          {/* Live + step list */}
+          <div className="row" style={{ alignItems: 'flex-start', gap: 48 }}>
+            <div className="device-wrap">
+              <IOSDevice>
+                {phase === 'onboarding' ? (
+                  <OnboardingFlow
+                    key={liveKey.current}
+                    tweaks={t}
+                    initialStep={currentStep}
+                    onStepChange={setCurrentStep}
+                    onFinish={() => { liveKey.current += 1; setPhase('main'); }}
+                  />
+                ) : (
+                  <MainScreen />
+                )}
+              </IOSDevice>
+              <div className="device-label">
+                {phase === 'main'
+                  ? <span>메인 화면 도착</span>
+                  : <span>인터랙티브 데모 · <strong>{String(currentStep + 1).padStart(2,'0')} / {STEPS.length}</strong></span>}
+              </div>
+            </div>
+
+            {/* Step navigator */}
+            <div style={{
+              width: 340, background: '#FFFFFF', borderRadius: 20, padding: 16,
+              boxShadow: 'var(--shadow-card)',
+            }}>
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 600, padding: '4px 8px 10px' }}>
+                플로우 단계
+              </div>
+              {navItems.map((item, i) => {
+                const active = isActive(item);
+                const isMain = item.kind === 'main';
+                return (
+                  <React.Fragment key={i}>
+                    {isMain && <div style={{ height: 1, background: 'var(--cream-300)', margin: '6px 10px' }} />}
+                    <button onClick={() => goTo(item)}
+                      style={{
+                        display: 'flex', gap: 12, alignItems: 'center', width: '100%',
+                        padding: '11px 10px', borderRadius: 12, border: 'none',
+                        background: active ? 'var(--cream-200)' : 'transparent',
+                        cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
+                        transition: 'background 140ms',
+                      }}>
+                      <div style={{
+                        width: 26, height: 26, borderRadius: 999,
+                        background: active ? 'var(--blue-500)' : 'var(--cream-300)',
+                        color: active ? '#fff' : 'var(--text-tertiary)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: isMain ? 14 : 12, fontWeight: 700,
+                        fontFeatureSettings: '"tnum" 1', flexShrink: 0,
+                      }}>{isMain ? '✦' : String(item.idx + 1).padStart(2, '0')}</div>
+                      <div style={{
+                        fontSize: 13,
+                        color: active ? 'var(--text-primary)' : 'var(--text-tertiary)',
+                        fontWeight: active ? 600 : 500,
+                      }}>
+                        {item.text}
+                      </div>
+                    </button>
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Gallery */}
+          <div className="section-label" style={{ textAlign: 'center' }}>전체 화면 갤러리</div>
+          <div className="row">
+            {navItems.map((item, i) => (
+              <GalleryFrame
+                key={i}
+                kind={item.kind}
+                stepIdx={item.idx}
+                label={{
+                  idx: item.kind === 'main' ? '✦' : String(item.idx + 1).padStart(2, '0'),
+                  text: item.text,
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Notes */}
+          <div style={{
+            margin: '64px auto 0', maxWidth: 760, padding: '24px 28px',
+            background: '#FFFFFF', borderRadius: 20, boxShadow: 'var(--shadow-card)',
+            fontSize: 13, color: 'var(--text-tertiary)', lineHeight: 1.7,
+          }}>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 600, marginBottom: 10 }}>
+              디자인 메모
+            </div>
+            <ul style={{ margin: 0, paddingLeft: 18 }}>
+              <li>온보딩은 <strong style={{ color: 'var(--text-primary)' }}>7단계</strong>로 짧게 구성. <strong style={{ color: 'var(--text-primary)' }}>이름 · 생년월일 · 성별</strong>은 필수, <strong style={{ color: 'var(--text-primary)' }}>태어난 시각</strong>은 선택.</li>
+              <li>알림 시간을 설정하고 <strong style={{ color: 'var(--text-primary)' }}>완료하기</strong>를 누르면 별도 계산·공개 화면 없이 바로 메인 화면으로 이동합니다.</li>
+              <li>메인 도착 시점은 <em>첫날 대기 상태</em> — 봉인된 페이퍼 카드가 보이며, 유저가 직접 「오늘의 리포트 열기」를 눌러 첫 리포트를 받습니다.</li>
+              <li>상단에 7-도트 대신 얇은 진행 바를 두어 시각 노이즈를 줄였습니다.</li>
+              <li>우측 상단의 <strong style={{ color: 'var(--text-primary)' }}>Tweaks</strong>로 환영 화면 스타일·자동 재생을 바꿔 보세요.</li>
+            </ul>
+          </div>
+        </div>
+      );
+    }
+
+    function Root() {
+      const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+      return (
+        <React.Fragment>
+          <App t={t} />
+          <TweaksPanel title="Tweaks">
+            <TweakSection label="Welcome 화면">
+              <TweakRadio
+                label="스타일"
+                value={t.welcomeStyle}
+                options={[
+                  { value: 'hero',   label: '히어로' },
+                  { value: 'parade', label: '퍼레이드' },
+                ]}
+                onChange={(v) => setTweak('welcomeStyle', v)}
+              />
+            </TweakSection>
+            <TweakSection label="갤러리 데모">
+              <TweakToggle label="자동 재생" value={t.autoplay} onChange={(v) => setTweak('autoplay', v)} />
+            </TweakSection>
+          </TweaksPanel>
+        </React.Fragment>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<Root />);
+  </script>
+</body>
+</html>

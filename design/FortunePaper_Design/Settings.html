@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>FortunePaper · 설정</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="design-system/colors_and_type.css" />
+  <style>
+    html, body { margin: 0; padding: 0; background: #EEEEE6; min-height: 100vh; font-family: var(--font-sans); color: var(--text-primary); }
+    body { display: flex; flex-direction: column; align-items: center; padding: 40px 16px 64px; }
+    .page-eyebrow { font-size: 11px; letter-spacing: 0.16em; color: #6B7280; text-transform: uppercase; font-weight: 600; }
+    .page-title { font-size: 28px; font-weight: 800; color: #111827; letter-spacing: -0.02em; margin: 10px 0 6px; }
+    .page-sub { font-size: 14px; color: #6B7280; line-height: 1.6; max-width: 560px; text-align: center; }
+    .section-label { font-size: 11px; letter-spacing: 0.16em; color: #6B7280; text-transform: uppercase; font-weight: 600; margin: 56px 0 22px; }
+    .row { display: flex; gap: 28px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+    .device-wrap { display: flex; flex-direction: column; align-items: center; }
+    .device-label { font-size: 12px; color: #6B7280; margin-top: 12px; text-align: center; font-weight: 500; }
+    .device-label strong { color: #111827; font-weight: 700; }
+
+    /* animations (reused) */
+    @keyframes de-fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes de-float { 0%, 100% { transform: translate(-50%, -50%) rotate(-3deg); } 50% { transform: translate(-50%, calc(-50% - 4px)) rotate(-3deg); } }
+    @keyframes de-seal-pulse { 0%, 100% { transform: rotate(-8deg) scale(1); } 50% { transform: rotate(-8deg) scale(1.04); } }
+    @keyframes set-dialog-in { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  </style>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="design-system/ios-frame.jsx"></script>
+  <script type="text/babel" src="design-system/components.jsx"></script>
+  <script type="text/babel" src="screens.jsx"></script>
+  <script type="text/babel" src="daily-entry.jsx"></script>
+  <script type="text/babel" src="settings.jsx"></script>
+  <script type="text/babel" src="vendor/tweaks-panel.jsx"></script>
+
+  <script type="text/babel" data-presets="react">
+    // App states a user can be in once they tap the settings tab.
+    // - list      : settings list (default)
+    // - notify    : notification time editor
+    // - dialog    : confirmation dialog (logout | withdraw) overlaid on list
+    // - initial   : returned to onboarding welcome (post logout / withdraw)
+    // - today     : tapped 오늘 tab → mock home (Awaiting state)
+
+    function SettingsFlow({ initialState = 'list', resetKey = 0, frozen = false }) {
+      const [state, setState] = React.useState(initialState);
+      const [dialog, setDialog] = React.useState(null); // 'logout' | 'withdraw' | null
+      const [notifyTime, setNotifyTime] = React.useState('07:30');
+      const [pendingTime, setPendingTime] = React.useState('07:30');
+
+      React.useEffect(() => {
+        setDialog(null);
+        if (initialState === 'logout-dialog') { setState('list'); setDialog('logout'); }
+        else if (initialState === 'withdraw-dialog') { setState('list'); setDialog('withdraw'); }
+        else { setState(initialState); }
+      }, [initialState, resetKey]);
+
+      const no = () => {};
+      const guard = (fn) => frozen ? no : fn;
+
+      // Initial (post logout / withdraw) — show onboarding Welcome
+      if (state === 'initial') {
+        return <ScreenWelcome onNext={guard(() => setState('list'))} style="hero" />;
+      }
+
+      // Today tab tap — show mock home
+      if (state === 'today') {
+        return (
+          <HomeShell title="포츈페이퍼">
+            <AwaitingScreen
+              onOpen={no}
+              name="김민준"
+              dateText="2026. 05. 25"
+              dow="월요일"
+              streak={7}
+              style="paper"
+            />
+          </HomeShell>
+        );
+      }
+
+      // Notify edit
+      if (state === 'notify') {
+        return (
+          <SettingsShell title="알림 설정" onBack={guard(() => { setState('list'); setPendingTime(notifyTime); })}>
+            <NotifyEditScreen
+              value={pendingTime}
+              onChange={guard(setPendingTime)}
+              onSave={guard(() => { setNotifyTime(pendingTime); setState('list'); })}
+            />
+          </SettingsShell>
+        );
+      }
+
+      // List (with optional dialog overlay)
+      return (
+        <div style={{ position: 'relative', height: '100%' }}>
+          <SettingsShell title="설정">
+            <SettingsListScreen
+              notifyTime={notifyTime}
+              onOpenNotify={guard(() => { setPendingTime(notifyTime); setState('notify'); })}
+              onLogout={guard(() => setDialog('logout'))}
+              onWithdraw={guard(() => setDialog('withdraw'))}
+            />
+          </SettingsShell>
+
+          {dialog === 'logout' && (
+            <ConfirmDialog
+              title="로그아웃 하시겠습니까?"
+              message="다시 로그인하면 그동안의 운세 기록을 이어서 보실 수 있어요."
+              confirmLabel="로그아웃"
+              onCancel={guard(() => setDialog(null))}
+              onConfirm={guard(() => { setDialog(null); setState('initial'); })}
+            />
+          )}
+          {dialog === 'withdraw' && (
+            <ConfirmDialog
+              title="정말 탈퇴하시겠습니까?"
+              message="모든 사주 정보와 운세 기록이 영구 삭제되며, 복구할 수 없습니다."
+              confirmLabel="회원 탈퇴"
+              destructive
+              onCancel={guard(() => setDialog(null))}
+              onConfirm={guard(() => { setDialog(null); setState('initial'); })}
+            />
+          )}
+        </div>
+      );
+    }
+
+    function App() {
+      const [state, setState] = React.useState('list');
+      const [resetKey, setResetKey] = React.useState(0);
+
+      const stateLabels = {
+        'list':            { idx: '01', text: '설정 목록' },
+        'notify':          { idx: '02', text: '알림 설정 편집' },
+        'logout-dialog':   { idx: '03', text: '로그아웃 — 확인' },
+        'withdraw-dialog': { idx: '04', text: '회원 탈퇴 — 확인' },
+        'initial':         { idx: '05', text: '초기 화면 — 환영' },
+      };
+      const stateOrder = ['list', 'notify', 'logout-dialog', 'withdraw-dialog', 'initial'];
+
+      return (
+        <div style={{ width: '100%', maxWidth: 1620 }}>
+          <div style={{ textAlign: 'center', marginBottom: 36 }}>
+            <div className="page-eyebrow">FortunePaper · Settings</div>
+            <div className="page-title">설정 화면 & 흐름</div>
+            <div className="page-sub" style={{ margin: '0 auto' }}>
+              하단 TabBar의 <strong style={{ color: '#111827' }}>설정</strong> 진입 — 알림 설정·로그아웃·회원 탈퇴 3개 항목.
+              <br/>좌측 데모를 직접 탭하며 다이얼로그·확인 흐름을 끝까지 체험해 보세요.
+            </div>
+          </div>
+
+          {/* live + state list */}
+          <div className="row" style={{ alignItems: 'flex-start', gap: 48 }}>
+            <div className="device-wrap">
+              <IOSDevice>
+                <SettingsFlow initialState={state} resetKey={resetKey} />
+              </IOSDevice>
+              <div className="device-label">인터랙티브 데모</div>
+            </div>
+
+            <div style={{
+              width: 340, background: '#FFFFFF', borderRadius: 20, padding: 16,
+              boxShadow: 'var(--shadow-card)',
+            }}>
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 600, padding: '4px 8px 10px' }}>
+                상태 흐름
+              </div>
+              {stateOrder.map((s, i) => {
+                const active = state === s;
+                const meta = stateLabels[s];
+                return (
+                  <React.Fragment key={s}>
+                    {s === 'initial' && (
+                      <div style={{ height: 1, background: 'var(--cream-300)', margin: '6px 10px' }} />
+                    )}
+                    <button onClick={() => { setResetKey((k) => k + 1); setState(s); }}
+                      style={{
+                        display: 'flex', gap: 12, alignItems: 'center', width: '100%',
+                        padding: '11px 10px', borderRadius: 12, border: 'none',
+                        background: active ? 'var(--cream-200)' : 'transparent',
+                        cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
+                      }}>
+                      <div style={{
+                        width: 26, height: 26, borderRadius: 999,
+                        background: active ? 'var(--blue-500)' : 'var(--cream-300)',
+                        color: active ? '#fff' : 'var(--text-tertiary)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 12, fontWeight: 700, fontFeatureSettings: '"tnum" 1', flexShrink: 0,
+                      }}>{meta.idx}</div>
+                      <div style={{
+                        fontSize: 13,
+                        color: active ? 'var(--text-primary)' : 'var(--text-tertiary)',
+                        fontWeight: active ? 600 : 500,
+                      }}>{meta.text}</div>
+                    </button>
+                  </React.Fragment>
+                );
+              })}
+
+              <div style={{ marginTop: 14, padding: 12, borderRadius: 12, background: 'var(--cream-200)' }}>
+                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600 }}>상호작용 흐름</div>
+                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 6, lineHeight: 1.65 }}>
+                  <strong style={{ color: 'var(--text-primary)' }}>알림 설정</strong> → 시각 선택 후 저장하면 목록으로 돌아오며 우측 메타가 갱신됩니다.
+                  <br/><strong style={{ color: 'var(--text-primary)' }}>로그아웃 · 회원 탈퇴</strong> → 다이얼로그에서 확인 시 초기 환영 화면으로 이동합니다.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Gallery */}
+          <div className="section-label" style={{ textAlign: 'center' }}>전체 상태 갤러리</div>
+          <div className="row">
+            {stateOrder.map((s) => (
+              <div className="device-wrap" key={s}>
+                <IOSDevice>
+                  <SettingsFlow initialState={s} resetKey={`g-${s}`} frozen />
+                </IOSDevice>
+                <div className="device-label">
+                  <strong>{stateLabels[s].idx}</strong> · {stateLabels[s].text}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Notes */}
+          <div style={{
+            margin: '64px auto 0', maxWidth: 760, padding: '24px 28px',
+            background: '#FFFFFF', borderRadius: 20, boxShadow: 'var(--shadow-card)',
+            fontSize: 13, color: 'var(--text-tertiary)', lineHeight: 1.7,
+          }}>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 600, marginBottom: 10 }}>
+              디자인 메모
+            </div>
+            <ul style={{ margin: 0, paddingLeft: 18 }}>
+              <li>설정 화면은 단일 그룹 카드로 묶었습니다 — 항목이 늘어나도 같은 카드에 추가하면 됩니다.</li>
+              <li>알림 설정 항목 우측에 현재 시각을 메타로 노출 — 굳이 진입하지 않아도 상태 확인이 가능합니다.</li>
+              <li>로그아웃은 <strong style={{ color: 'var(--text-primary)' }}>파란 강조</strong>, 회원 탈퇴는 <strong style={{ color: '#D14545' }}>빨간 강조</strong>로 결과의 무게를 시각적으로 구분.</li>
+              <li>다이얼로그는 iOS 시스템 알림 톤 — 좌측 취소 / 우측 확인의 표준 배치.</li>
+              <li>확인 후 도착하는 “초기 화면”은 첫 실행 온보딩의 <strong style={{ color: 'var(--text-primary)' }}>Welcome</strong> 그대로 — 진입점이 일관됩니다.</li>
+            </ul>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

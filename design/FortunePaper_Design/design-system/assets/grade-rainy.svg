@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="rainy-cloud" cx="35%" cy="28%" r="85%">
+      <stop offset="0%" stop-color="#E4ECF5"></stop>
+      <stop offset="55%" stop-color="#B5C5D8"></stop>
+      <stop offset="100%" stop-color="#7B96B5"></stop>
+    </radialGradient>
+    <linearGradient id="rainy-drop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#A8C3E4"></stop>
+      <stop offset="100%" stop-color="#3F6DAC"></stop>
+    </linearGradient>
+    <radialGradient id="hi-rainy" cx="35%" cy="28%" r="40%">
+  <stop offset="0%" stop-color="#fff" stop-opacity="0.85"></stop>
+  <stop offset="100%" stop-color="#fff" stop-opacity="0"></stop>
+</radialGradient>
+    <filter id="drop-rainy" x="-25%" y="-15%" width="150%" height="150%">
+  <feGaussianBlur in="SourceAlpha" stdDeviation="5"></feGaussianBlur>
+  <feOffset dy="6" result="off"></feOffset>
+  <feComponentTransfer><feFuncA type="linear" slope="0.22"></feFuncA></feComponentTransfer>
+  <feMerge><feMergeNode></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
+</filter>
+  </defs>
+  <ellipse cx="120" cy="220" rx="68" ry="8" fill="#000" opacity="0.10"></ellipse>
+  <g filter="url(#drop-rainy)">
+    
+    <g fill="url(#rainy-drop)">
+      
+      <path d="M 80 168 q -8 14 0 24 a 8 8 0 0 0 16 0 q 8 -10 0 -24 z"></path>
+      <path d="M 120 184 q -8 14 0 24 a 8 8 0 0 0 16 0 q 8 -10 0 -24 z"></path>
+      <path d="M 160 168 q -8 14 0 24 a 8 8 0 0 0 16 0 q 8 -10 0 -24 z"></path>
+    </g>
+    
+    <path d="M 59 146&#xA;          a 30 30 0 0 1 -8 -58&#xA;          a 38 38 0 0 1 50 -22&#xA;          a 32 32 0 0 1 58 8&#xA;          a 28 28 0 0 1 8 54&#xA;          a 24 24 0 0 1 -16 18&#xA;          h -76&#xA;          a 24 24 0 0 1 -16 0 z" fill="url(#rainy-cloud)"></path>
+    <ellipse cx="100" cy="96" rx="32" ry="16" fill="url(#hi-rainy)"></ellipse>
+  </g>
+</svg>

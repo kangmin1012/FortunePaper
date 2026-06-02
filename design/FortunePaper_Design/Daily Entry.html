@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>FortunePaper · 오늘 첫 진입</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="design-system/colors_and_type.css" />
+  <style>
+    html, body {
+      margin: 0; padding: 0;
+      background: #EEEEE6; min-height: 100vh;
+      font-family: var(--font-sans); color: var(--text-primary);
+    }
+    body {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 40px 16px 64px;
+    }
+    .page-eyebrow { font-size: 11px; letter-spacing: 0.16em; color: #6B7280; text-transform: uppercase; font-weight: 600; }
+    .page-title { font-size: 28px; font-weight: 800; color: #111827; letter-spacing: -0.02em; margin: 10px 0 6px; }
+    .page-sub { font-size: 14px; color: #6B7280; line-height: 1.6; max-width: 560px; text-align: center; }
+    .section-label { font-size: 11px; letter-spacing: 0.16em; color: #6B7280; text-transform: uppercase; font-weight: 600; margin: 56px 0 22px; }
+    .row { display: flex; gap: 28px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+    .device-wrap { display: flex; flex-direction: column; align-items: center; }
+    .device-label { font-size: 12px; color: #6B7280; margin-top: 12px; text-align: center; font-weight: 500; }
+    .device-label strong { color: #111827; font-weight: 700; }
+
+    /* animations */
+    @keyframes de-float { 0%, 100% { transform: translate(-50%, -50%) rotate(-3deg); } 50% { transform: translate(-50%, calc(-50% - 4px)) rotate(-3deg); } }
+    @keyframes de-seal-pulse { 0%, 100% { transform: rotate(-8deg) scale(1); } 50% { transform: rotate(-8deg) scale(1.04); } }
+    @keyframes de-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes de-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+    @keyframes de-bar { from { width: 0%; } to { width: 100%; } }
+    @keyframes de-fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel" src="design-system/ios-frame.jsx"></script>
+  <script type="text/babel" src="design-system/components.jsx"></script>
+  <script type="text/babel" src="daily-entry.jsx"></script>
+  <script type="text/babel" src="vendor/tweaks-panel.jsx"></script>
+
+  <script type="text/babel" data-presets="react">
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "awaitingStyle": "paper",
+      "todayGrade": "SUNNY",
+      "streak": 7
+    }/*EDITMODE-END*/;
+
+    function Flow({ tweaks, initialState = 'awaiting', resetKey = 0, frozen = false }) {
+      const [state, setState] = React.useState(initialState);
+      React.useEffect(() => { setState(initialState); }, [initialState, resetKey]);
+
+      const dateText = '2026. 05. 24';
+      const dow = '일요일';
+      const name = '김민준';
+      const grade = tweaks.todayGrade;
+
+      let body = null;
+      let title = '포츈페이퍼';
+
+      if (state === 'awaiting') {
+        body = <AwaitingScreen
+          onOpen={frozen ? () => {} : () => setState('calculating')}
+          name={name} dateText={dateText} dow={dow} streak={tweaks.streak}
+          style={tweaks.awaitingStyle} />;
+      } else if (state === 'calculating') {
+        body = <CalculatingScreen name={name} onDone={frozen ? () => {} : () => setState('revealed')} />;
+        title = '계산 중';
+      } else if (state === 'revealed') {
+        body = <RevealedScreen
+          name={name} dateText={dateText} dow={dow} grade={grade}
+          onReset={frozen ? () => {} : () => setState('awaiting')} />;
+        title = '오늘의 운세';
+      }
+
+      return <HomeShell title={title}>{body}</HomeShell>;
+    }
+
+    function App({ tweaks }) {
+      const [state, setState] = React.useState('awaiting');
+      const [resetKey, setResetKey] = React.useState(0);
+
+      const stateLabels = {
+        awaiting:    '01 · 대기 — 봉인된 리포트',
+        calculating: '02 · 계산 중',
+        revealed:    '03 · 공개 — 오늘의 리포트',
+      };
+
+      return (
+        <div style={{ width: '100%', maxWidth: 1620 }}>
+          <div style={{ textAlign: 'center', marginBottom: 36 }}>
+            <div className="page-eyebrow">FortunePaper · Daily Entry</div>
+            <div className="page-title">기존 유저 · 오늘 첫 진입</div>
+            <div className="page-sub" style={{ margin: '0 auto' }}>
+              앱을 다시 열어 오늘의 리포트를 아직 받지 않은 상태에서 시작합니다.
+              <br/>유저가 <strong style={{ color: '#111827' }}>「오늘의 리포트 열기」</strong> 버튼을 눌러야 사주가 계산되고 공개됩니다.
+            </div>
+          </div>
+
+          <div className="row" style={{ alignItems: 'flex-start', gap: 48 }}>
+            {/* live */}
+            <div className="device-wrap">
+              <IOSDevice>
+                <Flow tweaks={tweaks} initialState={state} resetKey={resetKey} />
+              </IOSDevice>
+              <div className="device-label">
+                인터랙티브 데모
+              </div>
+            </div>
+
+            {/* state navigator */}
+            <div style={{
+              width: 320, background: '#FFFFFF', borderRadius: 20, padding: 16,
+              boxShadow: 'var(--shadow-card)',
+            }}>
+              <div style={{ fontSize: 11, color: 'var(--text-tertiary)', letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 600, padding: '4px 8px 10px' }}>
+                상태 흐름
+              </div>
+              {['awaiting', 'calculating', 'revealed'].map((s) => {
+                const active = s === state;
+                return (
+                  <button key={s} onClick={() => { setResetKey((k) => k + 1); setState(s); }}
+                    style={{
+                      display: 'flex', gap: 12, alignItems: 'center', width: '100%',
+                      padding: '12px 10px', borderRadius: 12, border: 'none',
+                      background: active ? 'var(--cream-200)' : 'transparent',
+                      cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
+                    }}>
+                    <div style={{
+                      width: 28, height: 28, borderRadius: 999,
+                      background: active ? 'var(--blue-500)' : 'var(--cream-300)',
+                      color: active ? '#fff' : 'var(--text-tertiary)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 12, fontWeight: 700,
+                    }}>{s === 'awaiting' ? '01' : s === 'calculating' ? '02' : '03'}</div>
+                    <div style={{ fontSize: 13, color: active ? 'var(--text-primary)' : 'var(--text-tertiary)', fontWeight: active ? 600 : 500 }}>
+                      {stateLabels[s]}
+                    </div>
+                  </button>
+                );
+              })}
+
+              <div style={{ marginTop: 14, padding: 12, borderRadius: 12, background: 'var(--cream-200)' }}>
+                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600 }}>흐름 설명</div>
+                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 6, lineHeight: 1.65 }}>
+                  앱을 다시 열면 <strong style={{ color: 'var(--text-primary)' }}>대기 상태</strong>에서 시작.
+                  봉인된 페이퍼 카드와 “오늘의 리포트 열기” CTA가 보이며, 탭하면 <strong style={{ color: 'var(--text-primary)' }}>계산</strong> 애니메이션을 거쳐
+                  <strong style={{ color: 'var(--text-primary)' }}>공개 상태</strong>의 오늘 리포트로 전환됩니다.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Gallery: 3 states side by side */}
+          <div className="section-label" style={{ textAlign: 'center' }}>3 상태 갤러리</div>
+          <div className="row">
+            {['awaiting', 'calculating', 'revealed'].map((s) => (
+              <div className="device-wrap" key={s}>
+                <IOSDevice>
+                  <Flow tweaks={tweaks} initialState={s} resetKey={`g-${s}`} frozen />
+                </IOSDevice>
+                <div className="device-label"><strong>{stateLabels[s].split(' · ')[0]}</strong> · {stateLabels[s].split(' · ')[1]}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Notes */}
+          <div style={{
+            margin: '64px auto 0', maxWidth: 760, padding: '24px 28px',
+            background: '#FFFFFF', borderRadius: 20, boxShadow: 'var(--shadow-card)',
+            fontSize: 13, color: 'var(--text-tertiary)', lineHeight: 1.7,
+          }}>
+            <div style={{ fontSize: 11, color: 'var(--text-tertiary)', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 600, marginBottom: 10 }}>
+              디자인 메모
+            </div>
+            <ul style={{ margin: 0, paddingLeft: 18 }}>
+              <li>대기 화면은 “이미 도착해 있지만, 아직 열지 않았다”는 감각을 줍니다 — 봉인된 페이퍼 카드 + FP 인장 메타포.</li>
+              <li>봉인된 카드 안의 <strong style={{ color: 'var(--text-primary)' }}>5단계 핍 스트립</strong>은 비어 있어, 오늘의 결과가 미공개임을 시각적으로 알립니다.</li>
+              <li>상단/하단 네비게이션은 세 상태 내내 유지 — 홈 컨텍스트가 끊기지 않습니다.</li>
+              <li>유저가 CTA를 탭하면 2.2초 동안의 계산 애니메이션이 “리포트가 만들어지고 있다”는 의식을 줍니다.</li>
+              <li>오른쪽 위 Tweaks에서 봉인 메타포(<em>페이퍼</em> / <em>아이콘 팬</em>), 오늘의 등급, 연속 일수를 조정해 보세요.</li>
+            </ul>
+          </div>
+        </div>
+      );
+    }
+
+    function Root() {
+      const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+      return (
+        <React.Fragment>
+          <App tweaks={t} />
+          <TweaksPanel title="Tweaks">
+            <TweakSection label="대기 화면">
+              <TweakRadio
+                label="메타포"
+                value={t.awaitingStyle}
+                options={[
+                  { value: 'paper', label: '페이퍼' },
+                  { value: 'fan',   label: '아이콘 팬' },
+                ]}
+                onChange={(v) => setTweak('awaitingStyle', v)}
+              />
+            </TweakSection>
+            <TweakSection label="오늘 결과 (시뮬레이션)">
+              <TweakSelect
+                label="등급"
+                value={t.todayGrade}
+                options={[
+                  { value: 'SUNNY',  label: '화창 SUNNY' },
+                  { value: 'CLEAR',  label: '맑음 CLEAR' },
+                  { value: 'CLOUDY', label: '구름 CLOUDY' },
+                  { value: 'RAINY',  label: '비 RAINY' },
+                  { value: 'STORM',  label: '폭풍 STORM' },
+                ]}
+                onChange={(v) => setTweak('todayGrade', v)}
+              />
+              <TweakNumber
+                label="연속 일수"
+                value={t.streak} min={0} max={365}
+                onChange={(v) => setTweak('streak', v)}
+              />
+            </TweakSection>
+          </TweaksPanel>
+        </React.Fragment>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<Root />);
+  </script>
+</body>
+</html>
