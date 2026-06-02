@@ -25,8 +25,14 @@ class UserRepositoryImpl(
         dto.toDomain()
     }
 
-    override suspend fun saveUser(kakaoId: String, birthDate: String, gender: String): Result<User> =
-        runCatching { userRemote.upsertUser(kakaoId, birthDate, gender).toDomain() }
+    override suspend fun saveUser(
+        kakaoId: String,
+        name: String,
+        birthDate: String,
+        gender: String,
+        birthTime: String?
+    ): Result<User> =
+        runCatching { userRemote.upsertUser(kakaoId, name, birthDate, gender, birthTime).toDomain() }
 
     override suspend fun updateNotifyTime(time: String?): Result<Unit> = runCatching {
         val userId = requireNotNull(userRemote.currentUserId()) { "로그인이 필요합니다" }
@@ -45,8 +51,10 @@ class UserRepositoryImpl(
     private fun UserDto.toDomain() = User(
         id = id,
         kakaoId = kakao_id,
+        name = name,
         birthDate = birth_date,
         gender = Gender.fromString(gender),
+        birthTime = birth_time,
         notifyTime = notify_time,
         fcmToken = fcm_token
     )

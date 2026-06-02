@@ -3,8 +3,10 @@ package com.fortune.paper.domain.model
 data class User(
     val id: String,
     val kakaoId: String,
+    val name: String,
     val birthDate: String,
     val gender: Gender,
+    val birthTime: String?,
     val notifyTime: String?,
     val fcmToken: String?
 )

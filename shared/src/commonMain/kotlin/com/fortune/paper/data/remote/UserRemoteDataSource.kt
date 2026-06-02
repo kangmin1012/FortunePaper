@@ -15,8 +15,10 @@ import kotlinx.serialization.json.put
 data class UserDto(
     val id: String,
     val kakao_id: String,
+    val name: String,
     val birth_date: String,
     val gender: String,
+    val birth_time: String? = null,
     val notify_time: String? = null,
     val fcm_token: String? = null,
     val created_at: String
@@ -26,8 +28,10 @@ data class UserDto(
 data class UserUpsert(
     val id: String,
     val kakao_id: String,
+    val name: String,
     val birth_date: String,
-    val gender: String
+    val gender: String,
+    val birth_time: String? = null
 )
 
 @Serializable
@@ -70,10 +74,23 @@ class UserRemoteDataSource(private val client: SupabaseClient) {
             .decodeSingleOrNull<UserDto>()
     }
 
-    suspend fun upsertUser(kakaoId: String, birthDate: String, gender: String): UserDto {
+    suspend fun upsertUser(
+        kakaoId: String,
+        name: String,
+        birthDate: String,
+        gender: String,
+        birthTime: String?
+    ): UserDto {
         val userId = requireNotNull(currentUserId()) { "인증된 사용자가 없음" }
         client.postgrest["users"].upsert(
-            UserUpsert(id = userId, kakao_id = kakaoId, birth_date = birthDate, gender = gender)
+            UserUpsert(
+                id = userId,
+                kakao_id = kakaoId,
+                name = name,
+                birth_date = birthDate,
+                gender = gender,
+                birth_time = birthTime
+            )
         )
         return requireNotNull(getUser(userId))
     }
