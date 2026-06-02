@@ -41,15 +41,65 @@
 ## Task 3. 카카오 로그인
 
 - [x] `KakaoAuth.kt` expect 선언 작성
-- [ ] `KakaoAuth.android.kt` actual 구현 (카카오 Android SDK) — 카카오 앱 키 필요
-- [ ] `KakaoAuth.ios.kt` actual 구현 (카카오 iOS SDK) — 카카오 앱 키 필요
-- [ ] Supabase Auth 커스텀 토큰 교환 로직 구현
+- [x] `KakaoAuth.android.kt` actual 구현 (카카오 Android SDK)
+- [ ] `KakaoAuth.ios.kt` actual 구현 (카카오 iOS SDK) — 현재 `NotImplementedError` 스텁, Xcode SPM 설정 필요
+- [x] Supabase Auth 커스텀 토큰 교환 로직 구현 (`kakao-auth` Edge Function + `signInWithKakao`)
 - [x] `UserRepository` 인터페이스 및 구현체 작성
-- [ ] 로그인 화면 UI (TOAD + MVI)
-  - [ ] `LoginState`, `LoginEvent`, `LoginDependencies`
-  - [ ] `KakaoLoginAction`
-  - [ ] `LoginScreen` Composable
+- [x] 로그인 화면 UI (TOAD + MVI)
+  - [x] `LoginState`, `LoginEvent`, `LoginDependencies`
+  - [x] `KakaoLoginAction`
+  - [x] `LoginScreen` Composable — ⚠️ Task 3.5에서 Welcome 화면으로 대체 예정 (로직은 재사용)
+- [x] Koin 모듈 등록
+
+---
+
+## Task 3.5. 온보딩 (첫 실행 플로우)
+
+> 디자인 기준: `design/FortunePaper_Design/Onboarding.html` · `screens.jsx`
+> 단일 디바이스 안에서 진행되는 **7단계 스텝 플로우**. 상단 진행바 → 본문 → 하단 CTA의 일관된 리듬(`StepShell`). 마지막 "완료하기" → 별도 계산/공개 화면 없이 곧바로 메인 화면 진입.
+> `STEPS = ['welcome', 'value', 'name', 'birth', 'gender', 'time', 'notify']`
+
+### 공통 골격 (shared chrome)
+- [ ] `StepShell` — 상단바(뒤로/진행바/건너뛰기) + 본문 + 하단 CTA 레이아웃
+- [ ] `ProgressDots` — 7단계용 얇은 진행 바 (`(step+1)/total` 비율)
+- [ ] `FPButton` — 기본 CTA 버튼 (`disabled` 상태 포함)
+- [ ] `Wheel` — iOS 스타일 휠 피커 (생년월일용)
+- [ ] `KakaoLoginButton` — 카카오 디자인 가이드 준수(#FEE500, radius 12, 좌측 심볼)
+
+### 단계별 화면
+- [ ] **0. Welcome** — 브랜드 소개(히어로 SUNNY 아이콘 + 5단계 날씨 스트립) + **카카오 로그인 버튼** + 약관 고지
+  - Task 3의 `LoginScreen`을 이 Welcome 화면으로 **대체/흡수**한다 (확정 a안). 로그인 로직(`KakaoLoginAction`·`LoginViewModel`·`LoginDependencies`)은 재사용하고 UI만 Welcome 디자인으로 교체
+- [ ] **1. Value** — 가치 제안 3카드 (한 장의 리포트 / 사주 기반 / 매일 아침)
+- [ ] **2. Name** — 이름 입력 (필수, 최대 12자) → `users.name` 저장
+- [ ] **3. Birth** — 생년월일 휠 피커 (년 1950–2010 / 월 / 일), 필수
+- [ ] **4. Gender** — 성별 음양 카드 (여=음 / 남=여), 필수
+- [ ] **5. Time** — 태어난 시각 12시진(자~해), **선택 입력** (건너뛰기/"잘 모르겠어요" 가능) → `users.birth_time` 저장(미선택 시 null)
+- [ ] **6. Notify** — 알림 시간 4프리셋(06:30/07:30/08:30/09:30, 기본 07:30) → "완료하기" → `users.notify_time` 저장
+
+### TOAD/MVI 구조
+- [ ] `OnboardingState` — `step` 인덱스 + 수집 필드(name, birth, gender, birthTime?, notifyTime) + 각 단계 유효성
+- [ ] `OnboardingEvent` — `NavigateToMain`, `ShowError` 등 일회성 이펙트
+- [ ] `OnboardingDependencies`
+- [ ] Actions (1액션 1파일)
+  - [ ] `NextStep` / `PrevStep` (단계 이동)
+  - [ ] `UpdateName` / `UpdateBirth` / `UpdateGender` / `UpdateBirthTime` / `UpdateNotifyTime`
+  - [ ] `SubmitOnboarding` — 필수값 검증 → `saveUser` + `updateNotifyTime` → `NavigateToMain`
+- [ ] `OnboardingViewModel` 작성
+- [ ] `OnboardingScreen` Composable (`StepShell` 기반 단계 렌더링)
+- [ ] `App()` 분기 연결 (로그인 후 프로필 없으면 온보딩, 있으면 리포트)
 - [ ] Koin 모듈 등록
+
+### 데이터 모델 변경 (A안 확정 — 디자인 우선, 2026-06-02)
+> PRD §8 · architecture.md DB 스키마 갱신 완료. Task 2(DB 스키마)는 아래 마이그레이션으로 보강 필요.
+- [x] 마이그레이션 SQL 작성 — `supabase/migrations/20260602093000_add_name_and_birth_time_to_users.sql` (name NOT NULL + birth_time, CHECK 제약 포함)
+- [ ] **위 마이그레이션 원격 적용** — `supabase login` → `supabase link` → `supabase db push` (사용자 직접 실행 필요, 자격증명 요함)
+- [x] `UserDto` · `UserUpsert`에 `name` · `birth_time` 필드 추가
+- [x] `UserRepository.saveUser` / `UserRemoteDataSource.upsertUser` 시그니처에 `name` · `birthTime` 추가 + `User` 도메인 모델/`toDomain` 매핑 갱신
+- [ ] (참고) `fortune` Edge Function 프롬프트에 `birth_time` 반영 (Task 4 연계, null이면 정오 대표값)
+
+### Welcome/로그인 통합 (a안 확정 — 2026-06-02)
+- [ ] Task 3의 `LoginScreen`을 Welcome 화면(온보딩 0단계)으로 대체 — UI는 Welcome 디자인, 로그인 로직은 기존 것 재사용
+- [ ] 로그인 성공 후 분기: 프로필 없으면 온보딩 1단계(Value)로 계속, 있으면 메인으로
 
 ---
 

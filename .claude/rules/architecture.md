@@ -238,7 +238,10 @@ Supabase pg_cron (매분) → notify_time이 현재 시각인 유저 조회 → 
 |------|------|------|
 | id | UUID PK | Supabase Auth uid |
 | kakao_id | TEXT UNIQUE | 카카오 식별자 |
-| birth_date | DATE | 사주 계산용 |
+| name | TEXT | 표시 이름 (필수, 최대 12자) |
+| birth_date | DATE | 사주 계산용 (필수) |
+| gender | TEXT | `MALE` / `FEMALE` (필수) |
+| birth_time | TEXT | 태어난 시각 12시진 (`자`~`해`), null이면 정오 대표값 (선택) |
 | notify_time | TIME | 알림 시각, null이면 비활성 |
 | fcm_token | TEXT | 앱 실행 시 갱신 |
 | created_at | TIMESTAMP | |
@@ -249,7 +252,7 @@ Supabase pg_cron (매분) → notify_time이 현재 시각인 유저 조회 → 
 | id | UUID PK | |
 | user_id | UUID FK | users.id 참조 |
 | date | DATE | user_id + date UNIQUE |
-| grade | TEXT | S/A/B/C/D |
+| grade | TEXT | `SUNNY / CLEAR / CLOUDY / RAINY / STORM` |
 | summary | TEXT | 종합운 한 줄 요약 |
 | advice | TEXT | 오늘의 조언 |
 | created_at | TIMESTAMP | |
