@@ -118,7 +118,11 @@
   - [x] `birth_time` 프롬프트 반영 (user_id로 서버 조회, null이면 정오 대표값) — PRD §8 연계 항목 해소
 - [x] `FortuneRepository` 인터페이스 및 구현체 작성
 - [x] `GetTodayReportUseCase` 작성
-- [ ] Edge Function 배포 및 테스트 — ⏳ **외부 단계(런타임)**: ① Gemini 키 발급 → `supabase secrets set GEMINI_API_KEY=...` ② `supabase functions deploy fortune --project-ref zvqecylagvkznetltlpu`(프로덕션 배포 권한 필요) ③ 실제 호출 테스트. *빌드 통과와 무관*
+- [x] Edge Function 배포 및 테스트
+  - [x] `GEMINI_API_KEY` Supabase 시크릿 등록 (다이제스트 확인, 레포에 미저장)
+  - [x] `fortune` 배포 — STATUS ACTIVE (v1), `--project-ref zvqecylagvkznetltlpu`
+  - [x] 도달성 스모크 테스트 — 무인증 POST 401(JWT 게이트), OPTIONS 200(CORS)
+  - [ ] 실제 Gemini 생성 e2e — Task 5에서 로그인 유저가 `GetTodayReportUseCase` 호출 시 검증 (합성 유저 테스트는 프로덕션 오염 우려로 보류)
 
 ---
 
