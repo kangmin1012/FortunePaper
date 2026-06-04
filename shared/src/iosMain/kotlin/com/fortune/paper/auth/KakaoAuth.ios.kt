@@ -1,10 +1,33 @@
 package com.fortune.paper.auth
 
-// iOS Kakao SDK 연동은 Xcode SPM 패키지 추가 후 구현합니다.
-// SPM: https://github.com/kakao/kakao-ios-sdk (KakaoSDKUser 추가)
-actual class KakaoAuth {
-    actual suspend fun login(): Result<KakaoToken> =
-        Result.failure(NotImplementedError("iOS Kakao SDK 미구현 (Xcode SPM 설정 필요)"))
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
-    actual suspend fun logout() {}
+actual class KakaoAuth {
+
+    actual suspend fun login(): Result<KakaoToken> {
+        val bridge = KakaoBridgeHolder.bridge
+            ?: return Result.failure(IllegalStateException("Kakao 브리지가 설정되지 않았습니다"))
+
+        return runCatching {
+            suspendCoroutine { cont ->
+                bridge.login(
+                    onSuccess = { accessToken, userId ->
+                        cont.resume(KakaoToken(accessToken = accessToken, userId = userId))
+                    },
+                    onError = { message ->
+                        cont.resumeWithException(IllegalStateException(message))
+                    }
+                )
+            }
+        }
+    }
+
+    actual suspend fun logout() {
+        val bridge = KakaoBridgeHolder.bridge ?: return
+        suspendCoroutine<Unit> { cont ->
+            bridge.logout { cont.resume(Unit) }
+        }
+    }
 }

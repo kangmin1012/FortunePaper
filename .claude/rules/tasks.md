@@ -42,7 +42,11 @@
 
 - [x] `KakaoAuth.kt` expect 선언 작성
 - [x] `KakaoAuth.android.kt` actual 구현 (카카오 Android SDK)
-- [ ] `KakaoAuth.ios.kt` actual 구현 (카카오 iOS SDK) — 현재 `NotImplementedError` 스텁, Xcode SPM 설정 필요
+- [x] `KakaoAuth.ios.kt` actual 구현 (카카오 iOS SDK) — Swift 브리지 패턴, 시뮬레이터 빌드 검증 완료(BUILD SUCCEEDED)
+  - Kotlin: `KakaoAuthBridge`(인터페이스) + `KakaoBridgeHolder`(주입 홀더) + `IosApp.kt`(`startApp` 부트스트랩: Koin+Supabase+브리지)
+  - Swift: `KakaoAuthBridgeImpl.swift`(SDK 호출) + `iOSApp.swift`(`initSDK`/`startApp`/`onOpenURL`) + `Info.plist`(URL scheme·쿼리 스킴) + `Secrets.xcconfig`(앱-사이드 키, gitignore)
+  - 외부 준비 완료: ① 카카오 콘솔 iOS 플랫폼(번들ID `com.fortune.paper`) 등록 ② Xcode SPM `https://github.com/kakao/kakao-ios-sdk` 추가(KakaoSDKCommon/Auth/User)
+  - 참고: `init*` 접두 함수는 ObjC 인터롭에서 이니셜라이저로 취급되어 Swift 노출 안 됨 → `startApp`으로 명명
 - [x] Supabase Auth 커스텀 토큰 교환 로직 구현 (`kakao-auth` Edge Function + `signInWithKakao`)
 - [x] `UserRepository` 인터페이스 및 구현체 작성
 - [x] 로그인 화면 UI (TOAD + MVI)

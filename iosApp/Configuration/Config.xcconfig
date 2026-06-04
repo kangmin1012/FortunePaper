@@ -1,3 +1,7 @@
+// gitignore된 Secrets.xcconfig에서 앱-사이드 키를 주입한다(없어도 빌드는 진행).
+// 값 채우는 법: Secrets.xcconfig.example 참고
+#include? "Secrets.xcconfig"
+
 TEAM_ID=
 
 PRODUCT_NAME=FortuneReport

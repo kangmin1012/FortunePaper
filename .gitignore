@@ -22,3 +22,6 @@ CLAUDE.local.md
 
 # Supabase CLI 로컬 상태
 supabase/.temp/
+
+# iOS 앱-사이드 시크릿 (local.properties와 동일 역할)
+iosApp/Configuration/Secrets.xcconfig
