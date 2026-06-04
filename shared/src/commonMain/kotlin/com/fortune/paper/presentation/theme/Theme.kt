@@ -73,6 +73,7 @@ fun AppTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = FortuneColorScheme,
         typography = fortuneTypography(notoSansKr()),
+        shapes = FortuneShapes,
         content = content
     )
 }

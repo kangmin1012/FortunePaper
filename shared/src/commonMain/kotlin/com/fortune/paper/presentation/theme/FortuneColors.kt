@@ -37,10 +37,17 @@ object FortuneColors {
     val kakaoYellow = Color(0xFFFEE500)
     val kakaoLabel = Color(0xD9000000) // rgba(0,0,0,0.85)
 
-    // Grade (날씨 등급)
+    // Grade (날씨 등급) — color: 아이콘/글로우 색
     val gradeSunny = Color(0xFFFFD700)
     val gradeClear = Color(0xFF87CEEB)
     val gradeCloudy = Color(0xFFB0BEC5)
     val gradeRainy = Color(0xFF5C8AC8)
     val gradeStorm = Color(0xFF546E7A)
+
+    // Grade headline — 흰 카드 위 등급 키워드 텍스트용 (color의 진한 변형, components.jsx GRADES 기준)
+    val gradeSunnyHeadline = Color(0xFFC99000)
+    val gradeClearHeadline = Color(0xFF2E7DA8)
+    val gradeCloudyHeadline = Color(0xFF607883)
+    val gradeRainyHeadline = Color(0xFF3F6DAC)
+    val gradeStormHeadline = Color(0xFF37474F)
 }

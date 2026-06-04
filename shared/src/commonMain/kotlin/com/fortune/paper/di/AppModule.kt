@@ -14,6 +14,8 @@ import com.fortune.paper.presentation.login.LoginDependencies
 import com.fortune.paper.presentation.login.LoginViewModel
 import com.fortune.paper.presentation.onboarding.OnboardingDependencies
 import com.fortune.paper.presentation.onboarding.OnboardingViewModel
+import com.fortune.paper.presentation.report.ReportDependencies
+import com.fortune.paper.presentation.report.ReportViewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 
@@ -34,6 +36,7 @@ val domainModule = module {
 val presentationModule = module {
     factory { LoginViewModel(LoginDependencies(userRepository = get(), kakaoAuth = get())) }
     factory { OnboardingViewModel(OnboardingDependencies(userRepository = get(), kakaoAuth = get())) }
+    factory { ReportViewModel(ReportDependencies(getTodayReport = get(), refreshReport = get())) }
 }
 
 val appModules = listOf(dataModule, domainModule, presentationModule)

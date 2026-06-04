@@ -128,19 +128,30 @@
 
 ## Task 5. 리포트 화면 UI
 
+> 디자인 기준: `design/FortunePaper_Design/daily-entry.jsx`. 사전 작업으로 디자인 시스템을 코드화(아래) 후 진행.
+> Android + iOS 빌드 통과 검증 완료(BUILD SUCCESSFUL, 에러·경고 없음).
+
+### 사전 작업 — 디자인 시스템 (`presentation/theme/`)
+- [x] `FortuneColors` 등급 headline 색 추가(GRADES 기준) + `GradeColors.kt`(`color()`/`headlineColor()` 매퍼)
+- [x] `FortuneDimens.kt`(Spacing/Radius) · `FortuneShapes.kt`(→ MaterialTheme.shapes) · `FortuneType.kt`(타입 스케일)
+- [x] `AppTheme` 에 shapes 연결
+- [x] 문서화 `docs/design-system.md`
+
+### 화면
 - [x] `FortuneReport` 도메인 모델 정의
-- [ ] `ReportState`, `ReportEvent`, `ReportDependencies` 작성
-- [ ] Actions 작성
-  - [ ] `LoadReport`
-  - [ ] `RefreshReport`
-- [ ] `ReportViewModel` 작성
-- [ ] `ReportScreen` Composable 작성
-  - [ ] 등급 표시 컴포넌트
-  - [ ] 한 줄 요약 컴포넌트
-  - [ ] 오늘의 조언 컴포넌트
-  - [ ] 로딩/에러 상태 처리
-- [ ] `App()` 에 화면 연결
-- [ ] Koin 모듈 등록
+- [x] `ReportState`, `ReportEvent`, `ReportDependencies` 작성
+- [x] Actions 작성
+  - [x] `LoadReport` (캐시 우선, 중복 로드 방지)
+  - [x] `RefreshReport` (실패해도 기존 리포트 유지)
+- [x] `ReportViewModel` 작성
+- [x] `ReportScreen` Composable 작성 (`ReportComponents.kt` 분리)
+  - [x] 등급 표시 컴포넌트 (hero 이모지 + 등급명 headline 색)
+  - [x] 한 줄 요약 컴포넌트 (체크 배지 + summary 카드)
+  - [x] 오늘의 조언 컴포넌트 (accent bar + advice 카드)
+  - [x] 로딩/에러 상태 처리 (계산중 로딩, 오류+재시도) + HomeShell(내비 새로고침/하단 탭바)
+- [x] `App()` 에 화면 연결 (`onboarded -> ReportScreen()`)
+- [x] Koin 모듈 등록 (`ReportViewModel`)
+- 보류 리소스(SVG 아이콘·정교 연출 등)는 `docs/deferred-resources.md` 기록
 
 ---
 
