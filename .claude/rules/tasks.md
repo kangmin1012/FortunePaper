@@ -111,13 +111,14 @@
 
 ## Task 4. 운세 리포트 생성
 
-- [ ] Supabase Edge Function `fortune` 작성 (Deno/TypeScript)
-  - [ ] Claude API 호출 로직
-  - [ ] `{ grade, summary, advice }` JSON 응답
-  - [ ] DB 저장 및 캐시 반환 로직
+- [x] Supabase Edge Function `fortune` 작성 (Deno/TypeScript) — `supabase/functions/fortune/index.ts`
+  - [x] Gemini API 호출 로직 (gemini-1.5-flash, responseSchema로 JSON 강제)
+  - [x] `{ grade, summary, advice }` JSON 응답 (등급 화이트리스트 검증·길이 클램프)
+  - [x] DB 저장 및 캐시 반환 로직 (당일 캐시 hit 반환 / 1일 보관: 과거 레코드 삭제 후 insert)
+  - [x] `birth_time` 프롬프트 반영 (user_id로 서버 조회, null이면 정오 대표값) — PRD §8 연계 항목 해소
 - [x] `FortuneRepository` 인터페이스 및 구현체 작성
 - [x] `GetTodayReportUseCase` 작성
-- [ ] Edge Function 배포 및 테스트
+- [ ] Edge Function 배포 및 테스트 — ⏳ **외부 단계(런타임)**: ① Gemini 키 발급 → `supabase secrets set GEMINI_API_KEY=...` ② `supabase functions deploy fortune --project-ref zvqecylagvkznetltlpu`(프로덕션 배포 권한 필요) ③ 실제 호출 테스트. *빌드 통과와 무관*
 
 ---
 
