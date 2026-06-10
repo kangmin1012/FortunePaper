@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fortune.paper.presentation.onboarding.actions.GoToNextStep
 import com.fortune.paper.presentation.onboarding.actions.GoToPreviousStep
-import com.fortune.paper.presentation.onboarding.actions.OnboardingLoginAction
 import com.fortune.paper.presentation.onboarding.actions.SetBirthDate
 import com.fortune.paper.presentation.onboarding.actions.SetBirthTime
 import com.fortune.paper.presentation.onboarding.actions.SetGender
@@ -43,7 +42,7 @@ fun OnboardingScreen(
     if (state.step == OnboardingStep.Welcome) {
         WelcomeStep(
             state = state,
-            onKakaoLogin = { viewModel.dispatch(OnboardingLoginAction) },
+            onStart = { viewModel.dispatch(GoToNextStep) },
         )
         return
     }

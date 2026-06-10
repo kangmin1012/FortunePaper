@@ -33,10 +33,6 @@ object FortuneColors {
     val borderDefault = gray200
     val error = Color(0xFFDC2626)
 
-    // Kakao
-    val kakaoYellow = Color(0xFFFEE500)
-    val kakaoLabel = Color(0xD9000000) // rgba(0,0,0,0.85)
-
     // Grade (날씨 등급) — color: 아이콘/글로우 색
     val gradeSunny = Color(0xFFFFD700)
     val gradeClear = Color(0xFF87CEEB)

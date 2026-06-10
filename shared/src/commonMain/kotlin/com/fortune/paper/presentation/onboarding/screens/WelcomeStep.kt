@@ -19,15 +19,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import com.fortune.paper.presentation.onboarding.OnboardingState
+import com.fortune.paper.presentation.onboarding.components.FPButton
 import com.fortune.paper.presentation.onboarding.components.GradeStrip
 import com.fortune.paper.presentation.onboarding.components.HeroGradeIcon
-import com.fortune.paper.presentation.onboarding.components.KakaoButton
 import com.fortune.paper.presentation.theme.FortuneColors
 
 @Composable
 fun WelcomeStep(
     state: OnboardingState,
-    onKakaoLogin: () -> Unit,
+    onStart: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -91,7 +91,7 @@ fun WelcomeStep(
                 )
                 Spacer(Modifier.height(12.dp))
             }
-            KakaoButton(onClick = onKakaoLogin, loading = state.isAuthenticating)
+            FPButton(text = "시작하기", onClick = onStart)
             Spacer(Modifier.height(12.dp))
             Text(
                 "계속하면 이용약관 · 개인정보 처리방침에 동의합니다.",

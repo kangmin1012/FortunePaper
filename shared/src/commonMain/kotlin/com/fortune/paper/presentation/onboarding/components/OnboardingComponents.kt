@@ -163,41 +163,6 @@ fun FPButton(
     }
 }
 
-/** 카카오 로그인 버튼 (#FEE500, 디자인 가이드 색). */
-@Composable
-fun KakaoButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    loading: Boolean = false,
-) {
-    Button(
-        onClick = onClick,
-        enabled = !loading,
-        modifier = modifier.fillMaxWidth().height(50.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = FortuneColors.kakaoYellow,
-            contentColor = FortuneColors.kakaoLabel,
-            disabledContainerColor = FortuneColors.kakaoYellow,
-            disabledContentColor = FortuneColors.kakaoLabel,
-        ),
-    ) {
-        if (loading) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(20.dp),
-                color = FortuneColors.kakaoLabel,
-                strokeWidth = 2.dp,
-            )
-        } else {
-            Text(
-                "카카오 로그인",
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-            )
-        }
-    }
-}
-
 /** 단계 상단의 작은 라벨 (eyebrow). */
 @Composable
 fun Eyebrow(text: String) {
