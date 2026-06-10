@@ -8,19 +8,42 @@
 
 ```kotlin
 val dataModule = module {
-    single { SupabaseClient }
-    single<FortuneRepository> { FortuneRepositoryImpl(get()) }
+    single { SupabaseClientProvider.client }
+    single { FortuneRemoteDataSource(get()) }
+    single { UserLocalDataSource(get()) }      // get() = DataStore<Preferences> (platformModule 제공)
+    single { FortuneLocalDataSource(get()) }
+    single<FortuneRepository> { FortuneRepositoryImpl(get(), get(), get()) }
     single<UserRepository> { UserRepositoryImpl(get()) }
 }
 
 val domainModule = module {
     factory { GetTodayReportUseCase(get()) }
+    factory { RefreshReportUseCase(get()) }
+    factory { SaveProfileUseCase(get(), get()) }
     factory { UpdateNotifyTimeUseCase(get()) }
+    factory { ResetAppDataUseCase(get(), get()) }
 }
 
 val presentationModule = module {
-    viewModel { ReportViewModel(ReportDependencies(get(), get())) }
-    viewModel { SettingsViewModel(SettingsDependencies(get(), get())) }
+    factory { OnboardingViewModel(OnboardingDependencies(get(), get())) }
+    factory { ReportViewModel(ReportDependencies(get(), get())) }
+    factory { SettingsViewModel(SettingsDependencies(get(), get(), get())) }
+}
+```
+
+플랫폼별 모듈 — DataStore 생성과 LocalNotifier처럼 플랫폼 API가 필요한 의존성만 제공한다.
+
+```kotlin
+// androidMain
+val platformModule = module {
+    single<DataStore<Preferences>> { createDataStore(androidContext()) }
+    single<LocalNotifier> { LocalNotifier(androidContext()) }
+}
+
+// iosMain (IosApp.kt)
+val platformModule = module {
+    single<DataStore<Preferences>> { createDataStore() }
+    single<LocalNotifier> { LocalNotifier() }
 }
 ```
 

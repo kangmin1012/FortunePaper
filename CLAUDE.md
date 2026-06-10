@@ -68,9 +68,12 @@ UI 개발 시 **`design/FortunePaper_Design/` 폴더를 디자인 기준으로 �
 | `design-system/colors_and_type.css` | 디자인 토큰 — 컬러(neutral·brand·날씨 등급), 타이포 스케일, spacing/radius/shadow/motion. `MaterialTheme` 토큰 매핑의 기준 |
 | `design-system/components.jsx` | 공통 컴포넌트 시안 |
 | `design-system/assets/grade-*.svg` | 날씨 5단계 등급 아이콘 (SUNNY/CLEAR/CLOUDY/RAINY/STORM) |
-| `Onboarding.html`, `screens.jsx` | 온보딩 플로우 화면 시안 |
+| `design-system/fonts/` | Noto Sans KR 폰트 실파일 (Thin~Black 9종 ttf) |
+| `Onboarding.html`, `screens.jsx` | 온보딩 플로우 화면 시안 — Welcome은 "시작하기" 버튼 (v1.1, 카카오 로그인 제거) |
 | `Daily Entry.html`, `daily-entry.jsx` | 리포트 메인 화면 시안 |
-| `Settings.html`, `settings.jsx` | 설정 화면 시안 |
+| `Settings.html`, `settings.jsx` | 설정 화면 시안 — 내 정보(`ProfileEditScreen`) / 알림 설정 / 정보 초기화 (v1.1) |
+| `App Icon.html`, `App Icon - Android.html` | 앱 아이콘 시안 (선택안 D "운세 한 장") — iOS / Android adaptive 변형 |
+| `screenshots/` | 시안 캡처 모음 (설정 흐름, 앱 아이콘 등) |
 
 - `ui.md`의 "Material3 토큰 사용, 값 하드코딩 금지" 원칙을 유지하되, 토큰 값은 위 `colors_and_type.css`를 출처로 삼아 `MaterialTheme`에 매핑한다.
 - 화면 구현 전 해당 시안 파일(`*.html` / `*.jsx`)을 확인하고, 시안과 어긋나는 결정이 필요하면 사용자에게 먼저 확인한다.

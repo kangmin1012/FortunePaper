@@ -1,6 +1,10 @@
 # FortunePaper 개발 태스크
 
-> 상태: ⬜ 미시작 / 🔄 진행중 / ✅ 완료 / ⏸ 보류
+> 상태: ⬜ 미시작 / 🔄 진행중 / ✅ 완료 / ⏸ 보류·폐기
+
+> **🔄 v1.1 전환 (2026-06-10)**: 카카오 로그인·서버 유저 DB를 제거하고 로컬 프로필(DataStore) + 로컬 알림으로 전환한다.
+> 기획 명세 → [`docs/spec-local-user-migration.md`](../../docs/spec-local-user-migration.md)
+> Task 1~5는 v1.0 기준 완료 이력으로 보존한다. 카카오·서버 DB 관련 산출물은 **Task 8에서 제거/대체**된다. Task 6(FCM 푸시)은 폐기되었고, 신규 작업은 **Task 8 시리즈** → Task 7(배포) 순서로 진행한다.
 
 ---
 
@@ -8,20 +12,20 @@
 
 | 상태 | 항목 | 비고 |
 |------|------|------|
-| ✅ | Supabase 프로젝트 생성 | Project URL · anon key · service_role key 확보 |
-| ⬜ | Firebase 프로젝트 생성 | google-services.json · GoogleService-Info.plist 다운로드, FCM 활성화 |
-| ✅ | 카카오 개발자 앱 등록 | Native 앱 키 확보, 패키지명 `com.fortune.paper` 등록, 카카오 로그인 활성화, Supabase 연동 완료 |
-| ✅ | AI API 키 발급 | Gemini API 사용 (Google AI Studio 무료 티어) — Task 4에서 키 발급 후 Edge Function에 적용 |
+| ✅ | Supabase 프로젝트 생성 | Project URL · anon key 확보 — v1.1부터 Edge Function `fortune` 호스팅 용도만 |
+| ⏸ | ~~Firebase 프로젝트 생성~~ | v1.1 폐기 — 로컬 알림 전환으로 FCM 불필요 |
+| ⏸ | ~~카카오 개발자 앱 등록~~ | v1.0에서 완료했으나 v1.1 폐기 — Task 8.6에서 연동 제거 |
+| ✅ | AI API 키 발급 | Gemini API 사용 (Google AI Studio 무료 티어) — Edge Function 시크릿 등록 완료 |
 
 ---
 
 ## Task 1. 프로젝트 세팅
 
 - [x] `libs.versions.toml` 의존성 추가
-  - [x] Supabase KMP SDK
+  - [x] Supabase KMP SDK — ⚠️ v1.1: Task 8.6에서 auth·postgrest 제거, functions만 유지
   - [x] Koin (KMP)
   - [x] Coil (KMP)
-  - [x] Firebase KMP (FCM) — 버전 카탈로그 등록 완료, `build.gradle.kts` 추가는 Task 6(google-services.json 준비 후)
+  - [x] Firebase KMP (FCM) — ⚠️ v1.1 폐기: Task 8.6에서 카탈로그 등록 제거
   - [x] Kotlin Serialization
 - [x] Koin 모듈 초기 구조 생성 (`di/` 디렉토리)
 - [x] 레이어 디렉토리 구조 생성 (`presentation/`, `domain/`, `data/`, `auth/`)
@@ -31,6 +35,8 @@
 
 ## Task 2. DB 스키마
 
+> ⚠️ **v1.1 폐기 예정** — 서버 유저 DB를 사용하지 않는다. Task 8.6에서 `users`·`fortunes` 테이블 DROP.
+
 - [x] Supabase에서 `users` 테이블 생성
 - [x] Supabase에서 `fortunes` 테이블 생성
 - [x] `user_id + date` UNIQUE 제약 추가
@@ -39,6 +45,8 @@
 ---
 
 ## Task 3. 카카오 로그인
+
+> ⚠️ **v1.1 제거 예정** — 로그인 개념이 사라짐. 아래 산출물 전체(KakaoAuth expect/actual, Swift 브리지, `kakao-auth` Edge Function, Login* 파일, 카카오 SDK 의존성)는 Task 8.6에서 삭제된다. 완료 이력으로만 보존.
 
 - [x] `KakaoAuth.kt` expect 선언 작성
 - [x] `KakaoAuth.android.kt` actual 구현 (카카오 Android SDK)
@@ -58,6 +66,8 @@
 ---
 
 ## Task 3.5. 온보딩 (첫 실행 플로우)
+
+> ⚠️ **v1.1 일부 변경 예정** — Welcome의 카카오 로그인 버튼은 "시작하기"로 교체(Task 8.3), `OnboardingLoginAction`·`KakaoButton`·`kakaoId`는 제거(Task 8.6), `SubmitOnboarding`은 서버 upsert → 로컬(DataStore) 저장으로 전환(Task 8.3). 나머지 단계 UI·TOAD 구조는 그대로 재사용.
 
 > 디자인 기준: `design/FortunePaper_Design/Onboarding.html` · `screens.jsx`
 > 단일 디바이스 안에서 진행되는 **7단계 스텝 플로우**. 상단 진행바 → 본문 → 하단 CTA의 일관된 리듬(`StepShell`). 마지막 "완료하기" → 별도 계산/공개 화면 없이 곧바로 메인 화면 진입.
@@ -101,7 +111,7 @@
 - [x] **위 마이그레이션 원격 적용** — 대시보드 SQL Editor로 적용 완료 (2026-06-02). `users.name`·`birth_time` 컬럼 생성 확인
 - [x] `UserDto` · `UserUpsert`에 `name` · `birth_time` 필드 추가
 - [x] `UserRepository.saveUser` / `UserRemoteDataSource.upsertUser` 시그니처에 `name` · `birthTime` 추가 + `User` 도메인 모델/`toDomain` 매핑 갱신
-- [ ] (참고) `fortune` Edge Function 프롬프트에 `birth_time` 반영 (Task 4 연계, null이면 정오 대표값)
+- [x] (참고) `fortune` Edge Function 프롬프트에 `birth_time` 반영 (Task 4에서 해소, null이면 정오 대표값)
 
 ### Welcome/로그인 통합 (a안 확정 — 2026-06-02)
 - [x] Task 3의 `LoginScreen`은 Welcome 화면(온보딩 0단계)으로 대체 — `App()`이 더 이상 `LoginScreen` 미사용 (`Login*` 파일은 잔존, 추후 정리 가능)
@@ -110,6 +120,8 @@
 ---
 
 ## Task 4. 운세 리포트 생성
+
+> ⚠️ **v1.1 개편 예정** — Edge Function의 DB 캐시·user_id 조회는 Task 8.4에서 stateless 방식으로 교체된다.
 
 - [x] Supabase Edge Function `fortune` 작성 (Deno/TypeScript) — `supabase/functions/fortune/index.ts`
   - [x] Gemini API 호출 로직 (gemini-1.5-flash, responseSchema로 JSON 강제)
@@ -122,7 +134,7 @@
   - [x] `GEMINI_API_KEY` Supabase 시크릿 등록 (다이제스트 확인, 레포에 미저장)
   - [x] `fortune` 배포 — STATUS ACTIVE (v1), `--project-ref zvqecylagvkznetltlpu`
   - [x] 도달성 스모크 테스트 — 무인증 POST 401(JWT 게이트), OPTIONS 200(CORS)
-  - [ ] 실제 Gemini 생성 e2e — Task 5에서 로그인 유저가 `GetTodayReportUseCase` 호출 시 검증 (합성 유저 테스트는 프로덕션 오염 우려로 보류)
+  - [ ] 실제 Gemini 생성 e2e — **Task 8.5로 이관** (stateless 개편 후 검증이 합리적)
 
 ---
 
@@ -155,29 +167,112 @@
 
 ---
 
-## Task 6. 푸시 알림
+## ~~Task 6. 푸시 알림~~ — ⏸ 폐기 (v1.1)
 
-- [ ] Firebase FCM 초기화 (Android / iOS)
-- [ ] FCM 토큰 갱신 로직 구현 (`users.fcm_token` 업데이트)
-- [ ] Supabase Edge Function `notify` 작성
-- [ ] Supabase `pg_cron` 스케줄러 설정 (매분 실행)
-- [ ] 알림 설정 화면 UI
-  - [ ] `SettingsState`, `SettingsEvent`, `SettingsDependencies`
-  - [ ] `UpdateNotifyTime` Action
-  - [ ] `SettingsScreen` Composable (시간 선택 UI)
-- [ ] `UpdateNotifyTimeUseCase` 작성
-- [ ] Koin 모듈 등록
+> **Task 8.7(설정 화면)·8.8(로컬 알림)로 대체됨.** 로컬 알림 전환으로 Firebase/FCM/pg_cron/`notify` Edge Function이 모두 불필요해짐 (서버 측 자산은 애초 미구현이라 삭제 대상 없음). 원래 항목은 이력으로만 보존:
+>
+> ~~Firebase FCM 초기화 / FCM 토큰 갱신 / Edge Function `notify` / pg_cron 스케줄러 / 알림 설정 화면 / UpdateNotifyTimeUseCase / Koin 등록~~
 
 ---
 
-## Task 7. 배포
+## Task 8. 로컬 전환 마이그레이션 (v1.1)
 
+> 기획 명세: [`docs/spec-local-user-migration.md`](../../docs/spec-local-user-migration.md)
+> **순서 원칙**: 각 단계 완료 시점에 빌드 가능 상태를 유지한다. 카카오·서버 잔재 제거(8.6)는 대체 경로(8.3·8.5)가 완성된 뒤에만 수행.
+
+### Task 8.1. DataStore 기반 구축 — ✅ 완료 (2026-06-10)
+
+- [x] `libs.versions.toml`에 `datastore-preferences-core` (androidx.datastore 1.1.7, KMP) 등록 + shared commonMain 적용
+- [x] `data/local/DataStoreFactory.kt` — 공통 `createDataStore(producePath)` + androidMain(`Context.filesDir`) / iosMain(`NSDocumentDirectory`) 오버로드 — 파일명 `fortune_paper.preferences_pb`
+  - expect/actual 대신 공통 팩토리 + 플랫폼 오버로드 패턴 사용 (플랫폼별 파라미터가 달라 expect/actual 불가)
+- [x] Koin `platformModule` 구성 (androidMain: `di/AndroidModule.kt` / iosMain: `IosApp.kt`) — `DataStore<Preferences>` + `LocalNotifier` single 제공
+
+### Task 8.2. 로컬 데이터 레이어 — ✅ 완료 (2026-06-10)
+
+- [x] `UserProfile` 도메인 모델 신설 (name, birthDate, gender, birthTime?, notifyEnabled, notifyTime) — 기존 `User` 삭제, `Gender`는 `UserProfile.kt`로 이동
+- [x] `UserLocalDataSource` — 프로필·알림 설정 read/write, `observeProfile(): Flow<UserProfile?>` (키 스키마 → architecture.md)
+- [x] `FortuneLocalDataSource` — 운세 캐시(`fortune_cache_json`) read/write/clear (`FortuneCache` @Serializable)
+- [x] `UserRepository` 인터페이스 개편 — `observeProfile` / `getProfile` / `saveProfile` / `updateNotifySettings` / `clearAll` (loginWithKakao·signOut 등 제거)
+- [x] `UserRepositoryImpl` 로컬 구현 교체 + `UpdateNotifyTimeUseCase`(enabled+time 시그니처로 개편) 연결 유지
+- [x] 신규 UseCase — `SaveProfileUseCase`(사주 변경 시 캐시 무효화 포함), `ResetAppDataUseCase`
+- [x] Koin 모듈 갱신
+
+### Task 8.3. 온보딩 · App 분기 전환
+
+> 디자인 기준 확보 (2026-06-10): `screens.jsx`의 Welcome 시안이 카카오 버튼 → `FPButton("시작하기")`로 갱신됨.
+
+- [x] Welcome 화면: 카카오 로그인 버튼 → `FPButton("시작하기")` (`GoToNextStep` 디스패치) — ✅ 완료 (2026-06-10)
+- [x] `OnboardingState`에서 `kakaoId`·인증 상태 제거, Welcome의 `canProceed = true`
+- [x] `SubmitOnboarding` 전환 — 필수값 검증 → `saveProfile`(로컬) + 알림 설정 저장 + 권한 요청·알림 예약 → `NavigateToMain`
+- [x] `App.kt` 분기 교체 — `sessionStatus` 감시 → `observeProfile()` Flow (Loading → 부재=온보딩 / 존재=리포트·설정, 초기화 시 Flow null 방출로 자동 복귀)
+
+### Task 8.4. fortune Edge Function stateless 개편 — 🔄 코드 완료, 원격 배포 대기
+
+> 원격 작업 절차 → [`docs/followup-local-migration.md`](../../docs/followup-local-migration.md)
+
+- [x] 요청 스펙 변경 — `{ user_id }` → `{ birth_date, gender, birth_time }` (name 미전송, 입력값 검증 추가)
+- [x] 응답 스펙 변경 — `{ date, grade, summary, advice }` (id/user_id/created_at 제거)
+- [x] DB 캐시 조회·insert·삭제 및 supabase-js 의존 제거 (Gemini 호출 + 검증·클램프만 잔존)
+- [ ] `verify_jwt = false` **배포** + 스모크 테스트 (apikey 포함 200 / 미포함 401) — `supabase/config.toml` 작성 완료, **배포는 수동 수행 필요** (세션 내 프로덕션 배포 권한 차단)
+- [x] `kakao-auth` 로컬 디렉토리 삭제 — 원격 `supabase functions delete kakao-auth`는 수동 수행 필요
+
+### Task 8.5. 리포트 흐름 전환 (8.2 + 8.4 의존) — 🔄 코드 완료, e2e는 배포 후
+
+- [x] `FortuneDto`·`FortuneRemoteDataSource` 신스펙 반영 (postgrest 캐시 조회 제거, functions.invoke만)
+- [x] `FortuneRepositoryImpl` 재구현 — 로컬 캐시 `date == 오늘(KST)` 시 반환(재호출 금지 강제) / 미스 시 프로필 읽어 호출 후 캐시 저장
+- [x] `FortuneRepository`에 `invalidateCache()` 추가 (8.7 프로필 수정 연계) + `FortuneReport` 도메인 모델에서 `id` 제거
+- [ ] **실제 Gemini 생성 e2e 검증** — fortune 배포(8.4) 후 온보딩 → 리포트 화면에서 실 생성 확인 (`docs/followup-local-migration.md` §2)
+
+### Task 8.6. 카카오 · 서버 잔재 완전 제거 (8.3 + 8.5 완료 후)
+
+> 상세 삭제 목록 → `docs/spec-local-user-migration.md` §6
+
+- [x] shared: `auth/` 전체, `presentation/login/` 전체, `OnboardingLoginAction`, `KakaoButton`(+kakao 컬러 토큰), `UserRemoteDataSource`(UserDto 포함), `SupabaseClientProvider`의 Auth·Postgrest 설치 제거 (Functions만 잔존)
+- [x] androidApp: `KakaoSdk.init`·`KakaoAuthHolder` 연결, Manifest의 kakao queries·AuthCodeHandlerActivity, gradle kakao 의존성·`KAKAO_NATIVE_APP_KEY` 제거
+- [x] iosApp: `KakaoAuthBridgeImpl.swift`, `iOSApp.swift`의 KakaoSDK/onOpenURL/브리지 인자, `Info.plist` kakao 스킴, `Secrets.xcconfig` 키, Xcode SPM `kakao-ios-sdk`(pbxproj) 제거 + 카카오 핀 남은 `Package.resolved` 삭제(재생성)
+- [x] `libs.versions.toml`: kakao·firebase·supabase-auth·supabase-postgrest 제거 (supabase-functions 유지)
+- [x] DB 정리: `users`·`fortunes` DROP 마이그레이션 작성 (`supabase/migrations/20260610120000_drop_users_and_fortunes.sql`) — [ ] **원격 적용 + Supabase Auth 기존 사용자 정리는 수동 수행 필요** (`docs/followup-local-migration.md` §1)
+- [x] `local.properties`: `kakao.nativeAppKey` 제거 + **`supabase.secretKey` 제거 (secrets.md 위반 해소)** — 키 롤테이션은 대시보드에서 검토 (followup §1.5)
+- [x] Android(`assembleDebug`) + iOS(시뮬레이터, BUILD SUCCEEDED) 빌드 검증 (2026-06-10)
+
+### Task 8.7. 설정 화면 — 내 정보 · 알림 · 정보 초기화 (8.2 의존)
+
+> 디자인 기준 확보 (2026-06-10): `settings.jsx`/`Settings.html` 시안 갱신 완료 — 설정 목록 3항목(**내 정보** / 알림 설정 / **정보 초기화**), `ProfileEditScreen`(이름 입력 + 생년월일 휠 + 성별 음양 카드 + 12시진 그리드·"잘 모르겠어요" + "저장하기" CTA), 초기화 확인 다이얼로그. UI 라벨은 시안 기준 "내 정보"·"정보 초기화" 사용. 흐름 데모는 `Settings.standalone.html`·`screenshots/settings-*.png` 참고.
+
+- [x] (선행 디자인) `settings.jsx`/`Settings.html` 시안 갱신 — 내 정보 편집 추가, 로그아웃·회원 탈퇴 → 정보 초기화 (2026-06-10 디자인 반영 확인)
+- [x] TOAD 구조 — `SettingsState`(view: List/ProfileEdit/NotifyEdit + 편집 초안), `SettingsEvent`, `SettingsDependencies`, `SettingsViewModel`, `SettingsScreen` — ✅ 완료 (2026-06-10)
+- [x] Actions (1액션 1파일) — `LoadSettings` / `ShowSettingsView` / `SetDraft*`(Name·Birth·Gender·BirthTime·NotifyTime) / `UpdateNotifyTime` / `ToggleNotify` / `SaveProfile` / `SetResetDialog` / `ResetAppData`
+- [x] 설정 목록 화면 — 내 정보(현재 이름 meta 표시) / 알림 설정(현재 시각 meta, 꺼짐 표시) / 정보 초기화(destructive) + 버전 푸터 (버전 라벨은 하드코딩 — TODO: followup §3)
+- [x] 내 정보 편집 UI — 온보딩 `WheelPicker` 재사용 + 시안의 `ProfileEditScreen` 기준 (이름 비우면 저장 비활성, 뒤로가기 시 편집 중 값 폐기 — 진입 시 초안 재시드)
+- [x] 사주 입력값(생년월일·성별·시진) 변경 감지 → `invalidateCache()` 호출 (이름만 변경 시 캐시 유지 — `SaveProfileUseCase`에서 강제)
+- [x] 정보 초기화 — 확인 다이얼로그(시안 문구 기준) → `clearAll()` + 알림 취소 → 온보딩 복귀 (Flow 분기로 자동)
+- [x] `ReportScreen` 하단 탭바에서 설정 진입 연결 (`App.kt` showSettings 분기) + Koin 등록
+
+### Task 8.8. 로컬 알림 (8.1 의존, 온보딩 연동은 8.3 · 설정 연동은 8.7) — ✅ 완료 (2026-06-10)
+
+- [x] `platform/notification/LocalNotifier.kt` expect — `requestPermission()` / `scheduleDaily(hour, minute)` / `cancel()` + `parseNotifyTime` 헬퍼
+- [x] Android actual — `AlarmManager.setAndAllowWhileIdle`(inexact) + `DailyFortuneAlarmReceiver`(알림 표시 후 익일 재예약) + `BootCompletedReceiver`(BOOT_COMPLETED 재예약) + API 33+ `POST_NOTIFICATIONS` 권한(`NotificationPermissionRequester` 브리지 ← MainActivity)
+- [x] iOS actual — `UNUserNotificationCenter` + `UNCalendarNotificationTrigger(repeats: true)` + `requestAuthorization`
+- [x] 알림 고정 문구 정의 — "오늘의 포춘페이퍼가 도착했어요 📰" (등급 미포함 — PRD §4.4)
+- [x] 온보딩 완료 시 권한 요청 + 예약(`SubmitOnboarding`), 설정 토글·시간 변경 시 재예약/취소 연동(`ToggleNotify`/`UpdateNotifyTime`)
+- [x] Koin 등록 (platformModule)
+
+---
+
+## Task 7. 배포 (Task 8 완료 후)
+
+> 앱 아이콘 시안 확보 (2026-06-10): `App Icon.html`(iOS) · `App Icon - Android.html`(Android) — 선택안 D "운세 한 장"(해 + 리포트 카드). `screenshots/app-icon.png` 참고.
+
+- [ ] 앱 아이콘 리소스 적용
+  - [ ] Android — adaptive icon (foreground/background 분리, `App Icon - Android.html` 기준)
+  - [ ] iOS — AppIcon asset set (`App Icon.html` 기준)
 - [ ] Android
   - [ ] 릴리즈 키스토어 생성
   - [ ] `build.gradle.kts` 릴리즈 서명 설정
   - [ ] Google Play Console 앱 등록
   - [ ] AAB 빌드 및 업로드
 - [ ] iOS
+  - [ ] 카카오 SPM·키 잔재 없음 최종 확인 (Task 8.6 재검증)
   - [ ] Apple Developer 앱 ID 등록
   - [ ] App Store Connect 앱 등록
   - [ ] Xcode 아카이브 및 업로드
@@ -187,5 +282,6 @@
 ## 미결정 사항
 
 - [x] 운세 등급 체계 확정 → **날씨 5단계** (`SUNNY / CLEAR / CLOUDY / RAINY / STORM`)
+- [x] 유저 정보 저장 방식 확정 → **로컬(DataStore) 저장, 계정 없음** (v1.1, 2026-06-10 — `docs/spec-local-user-migration.md`)
 - [ ] 수익 모델 확정 (출시 후 반응 보고 결정)
 - [ ] 커스텀 디자인 파일 적용 시점
