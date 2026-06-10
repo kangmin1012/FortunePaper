@@ -9,11 +9,11 @@
    상단 NavBar 와 하단 TabBar는 세 상태 내내 유지되어 일관된 홈 컨텍스트를 줍니다. */
 
 const DE_ASSETS = {
-  SUNNY:  'design-system/assets/grade-sunny.svg',
-  CLEAR:  'design-system/assets/grade-clear.svg',
-  CLOUDY: 'design-system/assets/grade-cloudy.svg',
-  RAINY:  'design-system/assets/grade-rainy.svg',
-  STORM:  'design-system/assets/grade-storm.svg',
+  SUNNY:  (window.__resources && window.__resources.gradeSunny)  || 'design-system/assets/grade-sunny.svg',
+  CLEAR:  (window.__resources && window.__resources.gradeClear)  || 'design-system/assets/grade-clear.svg',
+  CLOUDY: (window.__resources && window.__resources.gradeCloudy) || 'design-system/assets/grade-cloudy.svg',
+  RAINY:  (window.__resources && window.__resources.gradeRainy)  || 'design-system/assets/grade-rainy.svg',
+  STORM:  (window.__resources && window.__resources.gradeStorm)  || 'design-system/assets/grade-storm.svg',
 };
 
 // ─────────────── home shell (NavBar + body + TabBar) ───────────────

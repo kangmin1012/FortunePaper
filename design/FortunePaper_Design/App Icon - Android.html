@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FortunePaper — Android App Icon</title>
+<link rel="stylesheet" href="design-system/colors_and_type.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    background: radial-gradient(1100px 560px at 50% -8%, #FFFFFF 0%, var(--cream-200) 62%);
+    min-height: 100vh;
+    color: var(--text-primary);
+    padding: 72px 32px 110px;
+  }
+  .page { max-width: 980px; margin: 0 auto; }
+
+  header.head { text-align: center; margin-bottom: 60px; }
+  .eyebrow { font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700; color: var(--text-tertiary); }
+  .head h1 { font-size: 40px; font-weight: 800; letter-spacing: -0.035em; margin: 14px 0 14px; }
+  .pick { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--blue-600);
+    background: #EAF1FE; border: 1px solid #D7E4FD; padding: 7px 14px; border-radius: 999px; }
+  .pick .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--blue-500); }
+
+  /* hero */
+  .stage { margin: 0 auto 30px; display: flex; flex-direction: column; align-items: center; gap: 30px;
+    padding: 60px 40px 52px; background: linear-gradient(180deg, #FFFFFF 0%, var(--cream-100) 100%);
+    border: 1px solid var(--border-subtle); border-radius: 32px; box-shadow: var(--shadow-raised); }
+  .hero-icon { filter: drop-shadow(0 24px 46px rgba(240,170,0,0.22)) drop-shadow(0 8px 18px rgba(17,24,39,0.10)); }
+  .icon { overflow: hidden; display: block; background: transparent; }
+  .icon svg { display: block; }
+  .hero-cap { text-align: center; }
+  .hero-cap .kr { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; }
+  .hero-cap .en { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-tertiary); margin-top: 6px; font-weight: 600; }
+
+  /* sections */
+  .section { margin-top: 56px; }
+  .section > h2 { font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-tertiary);
+    font-weight: 700; margin: 0 0 8px; display: flex; align-items: center; gap: 12px; }
+  .section > h2::after { content: ""; flex: 1; height: 1px; background: var(--border-default); }
+  .section .lead { font-size: 13.5px; color: var(--text-tertiary); line-height: 1.65; margin: 0 0 20px; max-width: 680px; text-wrap: pretty; }
+  .section .lead strong { color: var(--text-secondary); font-weight: 600; }
+
+  .card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 24px;
+    padding: 34px 32px; box-shadow: var(--shadow-card); }
+
+  /* layers */
+  .layers { display: grid; grid-template-columns: 1fr 36px 1fr 36px 1fr; align-items: center; gap: 0; }
+  .layer { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .layer .checker { border-radius: 18px; padding: 8px;
+    background-image: linear-gradient(45deg,#eceae2 25%,transparent 25%),linear-gradient(-45deg,#eceae2 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#eceae2 75%),linear-gradient(-45deg,transparent 75%,#eceae2 75%);
+    background-size: 16px 16px; background-position: 0 0,0 8px,8px -8px,-8px 0; }
+  .layer .icon { box-shadow: 0 4px 12px rgba(17,24,39,0.10); border-radius: 14px; }
+  .layer .lbl { font-size: 12.5px; font-weight: 700; }
+  .layer .sub { font-size: 11.5px; color: var(--text-tertiary); margin-top: -8px; }
+  .op { text-align: center; font-size: 26px; color: var(--text-secondary); font-weight: 300; }
+
+  /* masks */
+  .masks { display: flex; gap: 30px; flex-wrap: wrap; align-items: flex-end; }
+  .mask { display: flex; flex-direction: column; align-items: center; gap: 11px; }
+  .mask .lbl { font-size: 11px; color: var(--text-tertiary); font-weight: 600; }
+  .mask .icon { box-shadow: 0 6px 16px rgba(17,24,39,0.16); }
+  .m-circle    { border-radius: 50%; }
+  .m-squircle  { border-radius: 44%; }
+  .m-rounded   { border-radius: 25%; }
+  .m-teardrop  { border-radius: 50% 50% 50% 12%; }
+  .m-square    { border-radius: 8%; }
+
+  /* safe zone */
+  .safe-wrap { display: flex; gap: 38px; align-items: center; flex-wrap: wrap; }
+  .safe-stage { position: relative; width: 300px; height: 300px; flex: none; }
+  .safe-stage .icon { position: absolute; inset: 0; border-radius: 16px; }
+  .safe-stage .grid { position: absolute; inset: 0; pointer-events: none; }
+  .safe-legend { font-size: 13px; color: var(--text-secondary); line-height: 1.8; }
+  .safe-legend .k { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 9px; vertical-align: -1px; }
+
+  /* themed */
+  .themed { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .theme-tile { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 30px; border-radius: 22px; }
+  .theme-tile.light { background: #E7E1D2; }
+  .theme-tile.dark  { background: #23262E; }
+  .theme-tile .icon { box-shadow: 0 6px 16px rgba(0,0,0,0.18); border-radius: 25%; }
+  .theme-tile .tnm { font-size: 12.5px; font-weight: 600; }
+  .theme-tile.light .tnm { color: #5a5444; }
+  .theme-tile.dark  .tnm { color: #b9bdc7; }
+
+  /* exports */
+  .exports { display: flex; flex-wrap: wrap; gap: 12px; }
+  .dl { font-family: var(--font-sans); font-size: 12.5px; font-weight: 600; color: var(--text-primary);
+    background: var(--cream-200); border: 1px solid var(--border-default); padding: 11px 18px; border-radius: 999px;
+    cursor: pointer; transition: background var(--dur-fast) var(--ease-standard), transform var(--dur-fast) var(--ease-standard); }
+  .dl:hover { background: var(--cream-300); }
+  .dl:active { transform: translateY(1px); }
+
+  /* home */
+  .phone { border-radius: 30px; padding: 26px 22px 30px; border: 1px solid rgba(255,255,255,0.4);
+    box-shadow: var(--shadow-raised); background: linear-gradient(165deg, #1c2733 0%, #324154 100%); }
+  .phone .ptime { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.92); margin-bottom: 24px; letter-spacing: .02em; }
+  .apps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px 14px; }
+  .app { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .app .icon { box-shadow: 0 5px 13px rgba(0,0,0,0.3); }
+  .app .nm { font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.88); letter-spacing: -0.01em; }
+  .app .dummy { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.10); }
+
+  .note { margin-top: 20px; font-size: 12.5px; color: var(--text-tertiary); line-height: 1.7; text-wrap: pretty; max-width: 680px; }
+  .note strong { color: var(--text-secondary); font-weight: 600; }
+
+  @media (max-width: 720px) {
+    .layers { grid-template-columns: 1fr; gap: 18px; }
+    .op { transform: rotate(90deg); }
+    .themed { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="head">
+    <div class="eyebrow">FortunePaper · 포츈페이퍼</div>
+    <h1>안드로이드 앱 아이콘</h1>
+    <div class="pick"><span class="dot"></span>적응형 아이콘 · Adaptive Icon</div>
+  </header>
+
+  <!-- hero -->
+  <div class="stage">
+    <div class="hero-icon"><div class="icon m-squircle" id="hero" style="width:268px;height:268px;"></div></div>
+    <div class="hero-cap">
+      <div class="kr">전경 + 배경 레이어로 분리된 적응형 아이콘</div>
+      <div class="en">Foreground · Background · 108 × 108 dp</div>
+    </div>
+  </div>
+
+  <!-- layers -->
+  <section class="section">
+    <h2>레이어 구성</h2>
+    <p class="lead">안드로이드 적응형 아이콘은 <strong>전경</strong>과 <strong>배경</strong> 두 장의 레이어로 제출합니다. 시스템이 두 레이어를 합성한 뒤 기기·런처별 마스크를 씌우므로, 핵심 그래픽(해·운세 종이)은 가운데 안전 영역 안에 배치했습니다.</p>
+    <div class="card">
+      <div class="layers">
+        <div class="layer">
+          <div class="checker"><div class="icon" id="lyr-fg" style="width:150px;height:150px;"></div></div>
+          <div class="lbl">전경 (Foreground)</div>
+          <div class="sub">투명 배경 · 안전 영역 안</div>
+        </div>
+        <div class="op">+</div>
+        <div class="layer">
+          <div class="icon" id="lyr-bg" style="width:150px;height:150px;border-radius:14px;"></div>
+          <div class="lbl">배경 (Background)</div>
+          <div class="sub">풀 블리드 그라데이션</div>
+        </div>
+        <div class="op">=</div>
+        <div class="layer">
+          <div class="icon m-squircle" id="lyr-comp" style="width:150px;height:150px;"></div>
+          <div class="lbl">합성 결과</div>
+          <div class="sub">마스크 적용 전</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- masks -->
+  <section class="section">
+    <h2>런처 마스크</h2>
+    <p class="lead">같은 아이콘이 기기·런처 설정에 따라 다른 모양으로 잘립니다. 핵심 요소가 모든 마스크에서 온전히 보입니다.</p>
+    <div class="card">
+      <div class="masks" id="masks"></div>
+    </div>
+  </section>
+
+  <!-- safe zone -->
+  <section class="section">
+    <h2>안전 영역</h2>
+    <p class="lead">전체 캔버스는 <strong>108 × 108 dp</strong>, 어떤 마스크에서도 보존되는 안전 영역은 가운데 <strong>지름 72 dp</strong>입니다. 바깥 18 dp는 잘릴 수 있어 그래픽을 넣지 않습니다.</p>
+    <div class="card">
+      <div class="safe-wrap">
+        <div class="safe-stage">
+          <div class="icon m-squircle" id="safe-icon"></div>
+          <svg class="grid" viewBox="0 0 1024 1024">
+            <rect x="171" y="171" width="682" height="682" fill="none" stroke="rgba(37,99,235,0.55)" stroke-width="4" stroke-dasharray="14 12" rx="20"/>
+            <circle cx="512" cy="512" r="341" fill="none" stroke="rgba(240,160,0,0.9)" stroke-width="4" stroke-dasharray="14 12"/>
+          </svg>
+        </div>
+        <div class="safe-legend">
+          <div><span class="k" style="background:rgba(240,160,0,0.9)"></span>안전 영역 — 지름 72 dp (항상 보임)</div>
+          <div><span class="k" style="background:rgba(37,99,235,0.55)"></span>전경 키라인 — 66~72 dp 권장 배치</div>
+          <div style="margin-top:10px;color:var(--text-tertiary)">바깥 여백 18 dp는 시차(parallax)·마스크용 안전 마진</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- themed (monochrome) -->
+  <section class="section">
+    <h2>테마 아이콘 (Android 13+)</h2>
+    <p class="lead">사용자가 ‘테마 아이콘’을 켜면 시스템이 단색 전경 레이어를 배경색에 맞춰 자동 채색합니다. 가장 강한 브랜드 요소인 <strong>해</strong>를 단색 글리프로 단순화했습니다.</p>
+    <div class="themed">
+      <div class="theme-tile light">
+        <div class="icon" id="mono-light" style="width:128px;height:128px;"></div>
+        <div class="tnm">라이트 테마</div>
+      </div>
+      <div class="theme-tile dark">
+        <div class="icon" id="mono-dark" style="width:128px;height:128px;"></div>
+        <div class="tnm">다크 테마</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- home -->
+  <section class="section">
+    <h2>홈 화면</h2>
+    <div class="card" style="background:transparent;border:none;box-shadow:none;padding:0;">
+      <div class="phone" id="phone"></div>
+    </div>
+  </section>
+
+  <!-- exports -->
+  <section class="section">
+    <h2>내보내기</h2>
+    <div class="card">
+      <div class="exports" id="exports"></div>
+      <div class="note">안드로이드 스튜디오 기준 <strong>전경/배경 레이어</strong>는 각각 432×432 dp(여기선 1024px)로, <strong>모노크롬</strong>은 단색 전경으로 등록합니다. <strong>Play 스토어 아이콘</strong>은 512×512 풀 블리드 PNG입니다.</div>
+    </div>
+  </section>
+</div>
+
+<script>
+const SIZE = 1024;
+/* foreground sits inside the 72dp safe zone: scale art about centre */
+const FG_T = 'translate(512 512) scale(0.92) translate(-512 -512)';
+
+/* shared gradient defs */
+function defs(uid, variant) {
+  const blue = variant === 'blue';
+  const bgDef = blue
+    ? `<linearGradient id="${uid}-bg" x1="0.15" y1="0" x2="0.85" y2="1"><stop offset="0%" stop-color="#4D86F2"/><stop offset="55%" stop-color="#2A66E0"/><stop offset="100%" stop-color="#1A4CC0"/></linearGradient>`
+    : `<linearGradient id="${uid}-bg" x1="0" y1="0" x2="0.25" y2="1"><stop offset="0%" stop-color="#FCFBF7"/><stop offset="100%" stop-color="#EDEBE0"/></linearGradient>`;
+  const rayTop = blue ? '#FFE890' : '#FFDE6A', rayBot = blue ? '#FFC23E' : '#FFB81F';
+  return `
+    ${bgDef}
+    <radialGradient id="${uid}-body" cx="40%" cy="32%" r="72%"><stop offset="0%" stop-color="#FFF7C6"/><stop offset="52%" stop-color="#FFD63A"/><stop offset="100%" stop-color="#F0AE00"/></radialGradient>
+    <linearGradient id="${uid}-ray" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${rayTop}"/><stop offset="100%" stop-color="${rayBot}"/></linearGradient>
+    <radialGradient id="${uid}-glow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FFD23A" stop-opacity="0.30"/><stop offset="100%" stop-color="#FFD23A" stop-opacity="0"/></radialGradient>
+    <radialGradient id="${uid}-hi" cx="36%" cy="30%" r="46%"><stop offset="0%" stop-color="#fff" stop-opacity="0.9"/><stop offset="100%" stop-color="#fff" stop-opacity="0"/></radialGradient>`;
+}
+
+/* A — signature glossy sun. returns inner markup only */
+function art(uid, variant) {
+  let rays = '';
+  for (let i = 0; i < 8; i++) rays += `<g transform="rotate(${i*45} 512 512)"><rect x="486" y="150" width="52" height="130" rx="26" fill="url(#${uid}-ray)"/></g>`;
+  return `
+    <circle cx="512" cy="512" r="380" fill="url(#${uid}-glow)"/>
+    <g>${rays}</g>
+    <circle cx="512" cy="512" r="176" fill="url(#${uid}-body)"/>
+    <ellipse cx="458" cy="456" rx="80" ry="56" fill="url(#${uid}-hi)"/>`;
+}
+
+/* monochrome sun glyph for themed icons */
+function monoArt(color) {
+  let rays = '';
+  for (let i = 0; i < 8; i++) rays += `<g transform="rotate(${i*45} 512 512)"><rect x="486" y="150" width="52" height="132" rx="26" fill="${color}"/></g>`;
+  return `<g fill="${color}">${rays}<circle cx="512" cy="512" r="180"/></g>`;
+}
+
+function svg(inner) { return `<svg width="100%" height="100%" viewBox="0 0 ${SIZE} ${SIZE}" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`; }
+function bgSVG(uid, variant){ return svg(`<defs>${defs(uid,variant)}</defs><rect width="${SIZE}" height="${SIZE}" fill="url(#${uid}-bg)"/>`); }
+function fgSVG(uid, variant){ return svg(`<defs>${defs(uid,variant)}</defs><g transform="${FG_T}">${art(uid,variant)}</g>`); }
+function compSVG(uid, variant){ return svg(`<defs>${defs(uid,variant)}</defs><rect width="${SIZE}" height="${SIZE}" fill="url(#${uid}-bg)"/><g transform="${FG_T}">${art(uid,variant)}</g>`); }
+function monoSVG(bg, color){ return svg(`<rect width="${SIZE}" height="${SIZE}" fill="${bg}"/><g transform="translate(512 512) scale(0.78) translate(-512 -512)">${monoArt(color)}</g>`); }
+
+function setIcon(id, svgStr){ document.getElementById(id).innerHTML = svgStr; }
+
+/* export helper */
+function exportPNG(svgStr, filename, size) {
+  const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement('canvas'); c.width = size; c.height = size;
+    c.getContext('2d').drawImage(img, 0, 0, size, size);
+    URL.revokeObjectURL(url);
+    c.toBlob(png => { const a = document.createElement('a'); a.href = URL.createObjectURL(png); a.download = filename; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000); }, 'image/png');
+  };
+  img.src = url;
+}
+
+const VARIANT = 'cream'; /* Android backdrop: brand cream */
+
+/* render */
+setIcon('hero', compSVG('hero', VARIANT));
+setIcon('lyr-fg', fgSVG('fg', VARIANT));
+setIcon('lyr-bg', bgSVG('bg', VARIANT));
+setIcon('lyr-comp', compSVG('cmp', VARIANT));
+setIcon('safe-icon', compSVG('safe', VARIANT));
+
+/* masks */
+const MASKS = [
+  { c: 'm-circle',   l: '원형' },
+  { c: 'm-squircle', l: '슈퍼타원' },
+  { c: 'm-rounded',  l: '둥근사각' },
+  { c: 'm-teardrop', l: '물방울' },
+  { c: 'm-square',   l: '사각' },
+];
+const masksRoot = document.getElementById('masks');
+MASKS.forEach((m, i) => {
+  const wrap = document.createElement('div'); wrap.className = 'mask';
+  const ic = document.createElement('div'); ic.className = 'icon ' + m.c;
+  ic.style.width = '104px'; ic.style.height = '104px';
+  ic.innerHTML = compSVG('mk'+i, VARIANT);
+  wrap.appendChild(ic);
+  const lbl = document.createElement('div'); lbl.className = 'lbl'; lbl.textContent = m.l;
+  wrap.appendChild(lbl);
+  masksRoot.appendChild(wrap);
+});
+
+/* themed */
+setIcon('mono-light', monoSVG('#E7E1D2', '#3A4A66'));
+setIcon('mono-dark',  monoSVG('#3A3F49', '#DCE3F0'));
+
+/* home screen */
+const phone = document.getElementById('phone');
+phone.innerHTML = '<div class="ptime">9:41</div>';
+const apps = document.createElement('div'); apps.className = 'apps';
+['d','d','d','fp','d','d','d','d'].forEach(kind => {
+  const app = document.createElement('div'); app.className = 'app';
+  if (kind === 'fp') {
+    const ic = document.createElement('div'); ic.className = 'icon m-circle';
+    ic.style.width = '56px'; ic.style.height = '56px'; ic.innerHTML = compSVG('hs', VARIANT);
+    app.appendChild(ic);
+    const nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = '포츈페이퍼';
+    app.appendChild(nm);
+  } else {
+    const d = document.createElement('div'); d.className = 'dummy'; app.appendChild(d);
+    const nm = document.createElement('div'); nm.className = 'nm'; nm.style.opacity = '0'; nm.textContent = '·'; app.appendChild(nm);
+  }
+  apps.appendChild(app);
+});
+phone.appendChild(apps);
+
+/* exports */
+const EXPORTS = [
+  { t: '↓ 전경 1024 (투명)', fn: () => exportPNG(fgSVG('e1', VARIANT), 'fortunepaper-android-foreground-1024.png', 1024) },
+  { t: '↓ 배경 1024',        fn: () => exportPNG(bgSVG('e2', VARIANT), 'fortunepaper-android-background-1024.png', 1024) },
+  { t: '↓ 모노크롬 1024',     fn: () => exportPNG(svg(`<g transform="translate(512 512) scale(0.78) translate(-512 -512)">${monoArt('#000000')}</g>`), 'fortunepaper-android-monochrome-1024.png', 1024) },
+  { t: '↓ Play 스토어 512',  fn: () => exportPNG(compSVG('e4', VARIANT), 'fortunepaper-playstore-512.png', 512) },
+];
+const exRoot = document.getElementById('exports');
+EXPORTS.forEach(e => { const b = document.createElement('button'); b.className = 'dl'; b.textContent = e.t; b.addEventListener('click', e.fn); exRoot.appendChild(b); });
+</script>
+</body>
+</html>

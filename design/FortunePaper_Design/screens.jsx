@@ -6,11 +6,11 @@ const STEPS = ['welcome', 'value', 'name', 'birth', 'gender', 'time', 'notify'];
 const TOTAL = STEPS.length;
 
 const ASSETS = {
-  SUNNY:  'design-system/assets/grade-sunny.svg',
-  CLEAR:  'design-system/assets/grade-clear.svg',
-  CLOUDY: 'design-system/assets/grade-cloudy.svg',
-  RAINY:  'design-system/assets/grade-rainy.svg',
-  STORM:  'design-system/assets/grade-storm.svg',
+  SUNNY:  (window.__resources && window.__resources.gradeSunny)  || 'design-system/assets/grade-sunny.svg',
+  CLEAR:  (window.__resources && window.__resources.gradeClear)  || 'design-system/assets/grade-clear.svg',
+  CLOUDY: (window.__resources && window.__resources.gradeCloudy) || 'design-system/assets/grade-cloudy.svg',
+  RAINY:  (window.__resources && window.__resources.gradeRainy)  || 'design-system/assets/grade-rainy.svg',
+  STORM:  (window.__resources && window.__resources.gradeStorm)  || 'design-system/assets/grade-storm.svg',
 };
 
 // ─────────────────────── shared chrome ───────────────────────
@@ -178,7 +178,7 @@ function ScreenWelcome({ onNext, style = 'hero' }) {
           </div>
         </div>
         <div style={{ padding: '12px 24px 28px' }}>
-          <KakaoLoginButton onClick={onNext} />
+          <FPButton onClick={onNext}>시작하기</FPButton>
           <div style={{ fontSize: 11, color: 'var(--text-secondary)', textAlign: 'center', marginTop: 12 }}>
             계속하면 <span style={{ textDecoration: 'underline' }}>이용약관</span> 및 <span style={{ textDecoration: 'underline' }}>개인정보 처리방침</span>에 동의합니다.
           </div>
@@ -217,7 +217,7 @@ function ScreenWelcome({ onNext, style = 'hero' }) {
         </div>
       </div>
       <div style={{ padding: '8px 24px 28px' }}>
-        <KakaoLoginButton onClick={onNext} />
+        <FPButton onClick={onNext}>시작하기</FPButton>
         <div style={{ fontSize: 11, color: 'var(--text-secondary)', textAlign: 'center', marginTop: 12, lineHeight: 1.5 }}>
           계속하면 <span style={{ textDecoration: 'underline' }}>이용약관</span> · <span style={{ textDecoration: 'underline' }}>개인정보 처리방침</span>에 동의합니다.
         </div>
@@ -505,7 +505,6 @@ function ScreenNotify({ onNext, onBack, step, total, value, onChange }) {
     <StepShell step={step} total={total} onBack={onBack}
       footer={<FPButton onClick={onNext}>완료하기</FPButton>}>
       <div style={{ paddingTop: 12, paddingBottom: 18 }}>
-        언제돠 알림마주
         <Eyebrow>마지막 — 알림</Eyebrow>
         <Title>리포트를 언제<br/>받아 보시겠어요?</Title>
         <Sub>설정한 시간에 매일 한 번, 오늘의 한 줄 요약을 알려 드립니다.</Sub>
@@ -698,6 +697,6 @@ function ScreenReveal({ onDone, name }) {
 }
 
 Object.assign(window, {
-  STEPS, TOTAL, ScreenWelcome, ScreenValue, ScreenName, ScreenBirth,
+  STEPS, TOTAL, Wheel, ScreenWelcome, ScreenValue, ScreenName, ScreenBirth,
   ScreenGender, ScreenTime, ScreenNotify, ScreenCalc, ScreenReveal,
 });

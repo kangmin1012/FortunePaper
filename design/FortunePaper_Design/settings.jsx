@@ -1,8 +1,9 @@
 /* FortunePaper · Settings
    하단 TabBar의 "설정" 탭에서 진입.
-   - 설정 목록: 알림 설정 / 로그아웃 / 회원 탈퇴
+   - 설정 목록: 내 정보 / 알림 설정 / 정보 초기화
+   - 내 정보: 온보딩에서 입력한 이름·생년월일·성별·태어난 시각 편집
    - 알림 설정: 회원가입 단계의 ScreenNotify 와 동일한 구조의 편집 화면
-   - 로그아웃 · 회원 탈퇴: 확인 다이얼로그 → 확인 시 초기 화면(온보딩 Welcome) 으로 이동
+   - 정보 초기화: 확인 다이얼로그 → 확인 시 모든 정보를 지우고 초기 화면(온보딩 Welcome) 으로 이동
 */
 
 // ─────────────── shell with optional back ───────────────
@@ -37,8 +38,15 @@ function SettingsShell({ title, onBack, children, showTabBar = true }) {
 }
 
 // ─────────────── settings list ───────────────
-function SettingsListScreen({ onOpenNotify, onLogout, onWithdraw, notifyTime }) {
+function SettingsListScreen({ onOpenProfile, onOpenNotify, onReset, notifyTime, profileName }) {
   const items = [
+    {
+      id: 'profile',
+      label: '내 정보',
+      meta: profileName,
+      onClick: onOpenProfile,
+      chevron: true,
+    },
     {
       id: 'notify',
       label: '알림 설정',
@@ -47,15 +55,9 @@ function SettingsListScreen({ onOpenNotify, onLogout, onWithdraw, notifyTime }) 
       chevron: true,
     },
     {
-      id: 'logout',
-      label: '로그아웃',
-      onClick: onLogout,
-      chevron: true,
-    },
-    {
-      id: 'withdraw',
-      label: '회원 탈퇴',
-      onClick: onWithdraw,
+      id: 'reset',
+      label: '정보 초기화',
+      onClick: onReset,
       destructive: true,
       chevron: true,
     },
@@ -178,6 +180,145 @@ function NotifyEditScreen({ value, onChange, onBack, onSave }) {
   );
 }
 
+// ─────────────── profile / saju info edit (settings) ───────────────
+// Edits the values captured during onboarding: 이름 · 생년월일 · 성별 · 태어난 시각.
+// value: { name, birth: { y, m, d }, gender: 'F'|'M'|null, time: string|null }
+function ProfileFieldLabel({ children, optional }) {
+  return (
+    <div style={{
+      fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase',
+      color: 'var(--text-tertiary)', fontWeight: 600, margin: '0 4px 10px',
+    }}>
+      {children}
+      {optional && <span style={{ fontWeight: 500, letterSpacing: 0, textTransform: 'none', marginLeft: 6 }}>선택</span>}
+    </div>
+  );
+}
+
+function ProfileEditScreen({ value, onChange, onSave }) {
+  const years = []; for (let y = 1950; y <= 2010; y++) years.push(y);
+  const months = []; for (let m = 1; m <= 12; m++) months.push(m);
+  const days = []; for (let d = 1; d <= 31; d++) days.push(d);
+  const hours = [
+    { id: '자', range: '23–01시' }, { id: '축', range: '01–03시' },
+    { id: '인', range: '03–05시' }, { id: '묘', range: '05–07시' },
+    { id: '진', range: '07–09시' }, { id: '사', range: '09–11시' },
+    { id: '오', range: '11–13시' }, { id: '미', range: '13–15시' },
+    { id: '신', range: '15–17시' }, { id: '유', range: '17–19시' },
+    { id: '술', range: '19–21시' }, { id: '해', range: '21–23시' },
+  ];
+
+  const set = (patch) => onChange({ ...value, ...patch });
+  const nameValid = (value.name || '').trim().length >= 1;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '4px 16px 12px' }}>
+        {/* 이름 */}
+        <div style={{ marginBottom: 28 }}>
+          <ProfileFieldLabel>이름</ProfileFieldLabel>
+          <input
+            value={value.name || ''}
+            onChange={(e) => set({ name: e.target.value })}
+            placeholder="예: 김민준"
+            style={{
+              width: '100%', boxSizing: 'border-box', height: 56, borderRadius: 14, padding: '0 16px',
+              border: `1.5px solid ${nameValid ? 'var(--blue-500)' : 'var(--border-default)'}`,
+              background: 'var(--bg-surface)', fontSize: 18, fontFamily: 'inherit',
+              color: 'var(--text-primary)', outline: 'none',
+            }}
+          />
+        </div>
+
+        {/* 생년월일 */}
+        <div style={{ marginBottom: 28 }}>
+          <ProfileFieldLabel>생년월일</ProfileFieldLabel>
+          <div style={{
+            background: 'var(--bg-surface)', borderRadius: 20, padding: '8px 0',
+            boxShadow: 'var(--shadow-card)', display: 'flex', position: 'relative',
+            height: 176, alignItems: 'center', overflow: 'hidden',
+          }}>
+            <div style={{
+              position: 'absolute', left: 12, right: 12, top: 'calc(50% - 22px)', height: 44,
+              background: 'var(--cream-200)', borderRadius: 10, pointerEvents: 'none',
+            }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 52,
+              background: 'linear-gradient(180deg, rgba(255,255,255,1), rgba(255,255,255,0))', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 52,
+              background: 'linear-gradient(0deg, rgba(255,255,255,1), rgba(255,255,255,0))', pointerEvents: 'none' }} />
+            <Wheel items={years} suffix="년" value={value.birth.y} onChange={(v) => set({ birth: { ...value.birth, y: v } })} />
+            <Wheel items={months} suffix="월" value={value.birth.m} onChange={(v) => set({ birth: { ...value.birth, m: v } })} pad />
+            <Wheel items={days} suffix="일" value={value.birth.d} onChange={(v) => set({ birth: { ...value.birth, d: v } })} />
+          </div>
+        </div>
+
+        {/* 성별 */}
+        <div style={{ marginBottom: 28 }}>
+          <ProfileFieldLabel>성별</ProfileFieldLabel>
+          <div style={{ display: 'flex', gap: 12 }}>
+            {[
+              { id: 'F', kr: '여성', mark: '음', accent: '#E8B4D2' },
+              { id: 'M', kr: '남성', mark: '양', accent: '#FFD27A' },
+            ].map((o) => {
+              const active = value.gender === o.id;
+              return (
+                <button key={o.id} onClick={() => set({ gender: o.id })} style={{
+                  flex: 1, borderRadius: 16, padding: '14px 16px',
+                  background: 'var(--bg-surface)',
+                  border: active ? '2px solid var(--blue-500)' : '2px solid transparent',
+                  boxShadow: 'var(--shadow-card)', cursor: 'pointer', fontFamily: 'inherit',
+                  display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left',
+                  transition: 'border-color 140ms',
+                }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: 999, background: o.accent, flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 18, fontWeight: 700, color: 'rgba(0,0,0,0.5)',
+                  }}>{o.mark}</div>
+                  <div style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)' }}>{o.kr}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 태어난 시각 */}
+        <div style={{ marginBottom: 8 }}>
+          <ProfileFieldLabel optional>태어난 시각</ProfileFieldLabel>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+            {hours.map((h) => {
+              const active = value.time === h.id;
+              return (
+                <button key={h.id} onClick={() => set({ time: h.id })} style={{
+                  padding: '9px 4px 10px', borderRadius: 12,
+                  background: active ? 'var(--blue-500)' : 'var(--bg-surface)',
+                  border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                  boxShadow: active ? 'none' : 'var(--shadow-card)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+                  transition: 'all 140ms',
+                }}>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: active ? '#fff' : 'var(--text-primary)' }}>{h.id}시</div>
+                  <div style={{ fontSize: 10, color: active ? 'rgba(255,255,255,.8)' : 'var(--text-tertiary)' }}>{h.range}</div>
+                </button>
+              );
+            })}
+          </div>
+          <button onClick={() => set({ time: null })} style={{
+            marginTop: 10, width: '100%', padding: '11px', borderRadius: 12, background: 'transparent',
+            border: `1px dashed ${value.time === null ? 'var(--blue-500)' : 'var(--border-default)'}`,
+            color: value.time === null ? 'var(--blue-500)' : 'var(--text-tertiary)',
+            fontFamily: 'inherit', fontSize: 13, fontWeight: 500, cursor: 'pointer',
+          }}>잘 모르겠어요</button>
+        </div>
+      </div>
+
+      <div style={{ padding: '10px 16px 14px', borderTop: '1px solid var(--cream-300)', background: 'var(--bg-primary)' }}>
+        <FPButton onClick={onSave} disabled={!nameValid}>저장하기</FPButton>
+      </div>
+    </div>
+  );
+}
+
 // ─────────────── iOS-style confirm dialog ───────────────
 function ConfirmDialog({ title, message, confirmLabel, destructive, onConfirm, onCancel }) {
   return (
@@ -262,5 +403,5 @@ function SettingsTabBar({ activeTab = 'settings', onSelect }) {
 }
 
 Object.assign(window, {
-  SettingsShell, SettingsListScreen, NotifyEditScreen, ConfirmDialog, SettingsTabBar,
+  SettingsShell, SettingsListScreen, NotifyEditScreen, ProfileEditScreen, ConfirmDialog, SettingsTabBar,
 });

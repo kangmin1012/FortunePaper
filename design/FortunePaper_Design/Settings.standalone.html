@@ -4,7 +4,25 @@
   <meta charset="utf-8" />
   <title>FortunePaper · 설정</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="design-system/colors_and_type.css" />
+  <link rel="stylesheet" href="design-system/colors_and_type.nofonts.css" />
+
+  <!-- Code-referenced grade icons (string paths in JSX) lifted for the bundler -->
+  <meta name="ext-resource-dependency" content="design-system/assets/grade-sunny.svg"  data-resource-id="gradeSunny" />
+  <meta name="ext-resource-dependency" content="design-system/assets/grade-clear.svg"  data-resource-id="gradeClear" />
+  <meta name="ext-resource-dependency" content="design-system/assets/grade-cloudy.svg" data-resource-id="gradeCloudy" />
+  <meta name="ext-resource-dependency" content="design-system/assets/grade-rainy.svg"  data-resource-id="gradeRainy" />
+  <meta name="ext-resource-dependency" content="design-system/assets/grade-storm.svg"  data-resource-id="gradeStorm" />
+
+  <template id="__bundler_thumbnail" data-bg-color="#EEEEE6">
+    <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+      <rect width="1200" height="800" fill="#EEEEE6"/>
+      <rect x="470" y="250" width="260" height="300" rx="28" fill="#FFFFFF" stroke="#E5E3DA" stroke-width="3"/>
+      <circle cx="600" cy="360" r="64" fill="#FFD27A"/>
+      <circle cx="600" cy="360" r="64" fill="none" stroke="#F4B740" stroke-width="6"/>
+      <rect x="520" y="448" width="160" height="16" rx="8" fill="#111827"/>
+      <rect x="540" y="482" width="120" height="12" rx="6" fill="#C9C6BC"/>
+    </svg>
+  </template>
   <style>
     html, body { margin: 0; padding: 0; background: #EEEEE6; min-height: 100vh; font-family: var(--font-sans); color: var(--text-primary); }
     body { display: flex; flex-direction: column; align-items: center; padding: 40px 16px 64px; }
@@ -40,30 +58,21 @@
   <script type="text/babel" data-presets="react">
     // App states a user can be in once they tap the settings tab.
     // - list      : settings list (default)
-    // - profile   : my-info editor (name / birth / gender / birth-time)
     // - notify    : notification time editor
-    // - dialog    : confirmation dialog (reset) overlaid on list
-    // - initial   : returned to onboarding welcome (post reset)
+    // - dialog    : confirmation dialog (logout | withdraw) overlaid on list
+    // - initial   : returned to onboarding welcome (post logout / withdraw)
     // - today     : tapped 오늘 tab → mock home (Awaiting state)
-
-    const DEFAULT_PROFILE = { name: '김민준', birth: { y: 1995, m: 4, d: 12 }, gender: 'M', time: null };
 
     function SettingsFlow({ initialState = 'list', resetKey = 0, frozen = false }) {
       const [state, setState] = React.useState(initialState);
-      const [dialog, setDialog] = React.useState(null); // 'reset' | null
+      const [dialog, setDialog] = React.useState(null); // 'logout' | 'withdraw' | null
       const [notifyTime, setNotifyTime] = React.useState('07:30');
       const [pendingTime, setPendingTime] = React.useState('07:30');
-      const [profile, setProfile] = React.useState(DEFAULT_PROFILE);
-      const [pendingProfile, setPendingProfile] = React.useState(DEFAULT_PROFILE);
-
-      const resetAll = () => {
-        setProfile(DEFAULT_PROFILE); setPendingProfile(DEFAULT_PROFILE);
-        setNotifyTime('07:30'); setPendingTime('07:30');
-      };
 
       React.useEffect(() => {
         setDialog(null);
-        if (initialState === 'reset-dialog') { setState('list'); setDialog('reset'); }
+        if (initialState === 'logout-dialog') { setState('list'); setDialog('logout'); }
+        else if (initialState === 'withdraw-dialog') { setState('list'); setDialog('withdraw'); }
         else { setState(initialState); }
       }, [initialState, resetKey]);
 
@@ -104,40 +113,35 @@
         );
       }
 
-      // Profile edit (onboarding values)
-      if (state === 'profile') {
-        return (
-          <SettingsShell title="내 정보" onBack={guard(() => { setState('list'); setPendingProfile(profile); })}>
-            <ProfileEditScreen
-              value={pendingProfile}
-              onChange={guard(setPendingProfile)}
-              onSave={guard(() => { setProfile(pendingProfile); setState('list'); })}
-            />
-          </SettingsShell>
-        );
-      }
-
       // List (with optional dialog overlay)
       return (
         <div style={{ position: 'relative', height: '100%' }}>
           <SettingsShell title="설정">
             <SettingsListScreen
               notifyTime={notifyTime}
-              profileName={profile.name}
-              onOpenProfile={guard(() => { setPendingProfile(profile); setState('profile'); })}
               onOpenNotify={guard(() => { setPendingTime(notifyTime); setState('notify'); })}
-              onReset={guard(() => setDialog('reset'))}
+              onLogout={guard(() => setDialog('logout'))}
+              onWithdraw={guard(() => setDialog('withdraw'))}
             />
           </SettingsShell>
 
-          {dialog === 'reset' && (
+          {dialog === 'logout' && (
             <ConfirmDialog
-              title="정보를 초기화하시겠습니까?"
-              message="입력한 사주 정보와 그동안의 운세 기록이 모두 삭제되며, 처음부터 다시 설정해야 합니다."
-              confirmLabel="초기화"
+              title="로그아웃 하시겠습니까?"
+              message="다시 로그인하면 그동안의 운세 기록을 이어서 보실 수 있어요."
+              confirmLabel="로그아웃"
+              onCancel={guard(() => setDialog(null))}
+              onConfirm={guard(() => { setDialog(null); setState('initial'); })}
+            />
+          )}
+          {dialog === 'withdraw' && (
+            <ConfirmDialog
+              title="정말 탈퇴하시겠습니까?"
+              message="모든 사주 정보와 운세 기록이 영구 삭제되며, 복구할 수 없습니다."
+              confirmLabel="회원 탈퇴"
               destructive
               onCancel={guard(() => setDialog(null))}
-              onConfirm={guard(() => { setDialog(null); resetAll(); setState('initial'); })}
+              onConfirm={guard(() => { setDialog(null); setState('initial'); })}
             />
           )}
         </div>
@@ -149,13 +153,13 @@
       const [resetKey, setResetKey] = React.useState(0);
 
       const stateLabels = {
-        'list':          { idx: '01', text: '설정 목록' },
-        'profile':       { idx: '02', text: '내 정보 편집' },
-        'notify':        { idx: '03', text: '알림 설정 편집' },
-        'reset-dialog':  { idx: '04', text: '정보 초기화 — 확인' },
-        'initial':       { idx: '05', text: '초기화 후 — 온보딩' },
+        'list':            { idx: '01', text: '설정 목록' },
+        'notify':          { idx: '02', text: '알림 설정 편집' },
+        'logout-dialog':   { idx: '03', text: '로그아웃 — 확인' },
+        'withdraw-dialog': { idx: '04', text: '회원 탈퇴 — 확인' },
+        'initial':         { idx: '05', text: '초기 화면 — 환영' },
       };
-      const stateOrder = ['list', 'profile', 'notify', 'reset-dialog', 'initial'];
+      const stateOrder = ['list', 'notify', 'logout-dialog', 'withdraw-dialog', 'initial'];
 
       return (
         <div style={{ width: '100%', maxWidth: 1620 }}>
@@ -163,7 +167,7 @@
             <div className="page-eyebrow">FortunePaper · Settings</div>
             <div className="page-title">설정 화면 & 흐름</div>
             <div className="page-sub" style={{ margin: '0 auto' }}>
-              하단 TabBar의 <strong style={{ color: '#111827' }}>설정</strong> 진입 — 내 정보·알림 설정·정보 초기화 3개 항목.
+              하단 TabBar의 <strong style={{ color: '#111827' }}>설정</strong> 진입 — 알림 설정·로그아웃·회원 탈퇴 3개 항목.
               <br/>좌측 데모를 직접 탭하며 다이얼로그·확인 흐름을 끝까지 체험해 보세요.
             </div>
           </div>
@@ -220,7 +224,7 @@
                 <div style={{ fontSize: 11, color: 'var(--text-tertiary)', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600 }}>상호작용 흐름</div>
                 <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 6, lineHeight: 1.65 }}>
                   <strong style={{ color: 'var(--text-primary)' }}>알림 설정</strong> → 시각 선택 후 저장하면 목록으로 돌아오며 우측 메타가 갱신됩니다.
-                  <br/><strong style={{ color: 'var(--text-primary)' }}>정보 초기화</strong> → 다이얼로그에서 확인 시 모든 정보를 지우고 초기 환영 화면으로 이동합니다.
+                  <br/><strong style={{ color: 'var(--text-primary)' }}>로그아웃 · 회원 탈퇴</strong> → 다이얼로그에서 확인 시 초기 환영 화면으로 이동합니다.
                 </div>
               </div>
             </div>
@@ -251,12 +255,11 @@
               디자인 메모
             </div>
             <ul style={{ margin: 0, paddingLeft: 18 }}>
-              <li><strong style={{ color: 'var(--text-primary)' }}>내 정보</strong> 항목에서 온보딩 때 입력한 이름·생년월일·성별·태어난 시각을 그대로 다시 편집할 수 있습니다 — 온보딩과 동일한 휠/카드 UI를 재사용했습니다.</li>
               <li>설정 화면은 단일 그룹 카드로 묶었습니다 — 항목이 늘어나도 같은 카드에 추가하면 됩니다.</li>
               <li>알림 설정 항목 우측에 현재 시각을 메타로 노출 — 굳이 진입하지 않아도 상태 확인이 가능합니다.</li>
-              <li><strong style={{ color: '#D14545' }}>정보 초기화</strong>는 빨간 강조로 돌이킬 수 없는 동작임을 알립니다. 확인 시 모든 사주 정보·알림 설정을 지우고 온보딩 Welcome으로 돌아갑니다.</li>
+              <li>로그아웃은 <strong style={{ color: 'var(--text-primary)' }}>파란 강조</strong>, 회원 탈퇴는 <strong style={{ color: '#D14545' }}>빨간 강조</strong>로 결과의 무게를 시각적으로 구분.</li>
               <li>다이얼로그는 iOS 시스템 알림 톤 — 좌측 취소 / 우측 확인의 표준 배치.</li>
-              <li>초기화 후 도착하는 “초기 화면”은 첫 실행 온보딩의 <strong style={{ color: 'var(--text-primary)' }}>Welcome</strong> 그대로 — 진입점이 일관됩니다.</li>
+              <li>확인 후 도착하는 “초기 화면”은 첫 실행 온보딩의 <strong style={{ color: 'var(--text-primary)' }}>Welcome</strong> 그대로 — 진입점이 일관됩니다.</li>
             </ul>
           </div>
         </div>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FortunePaper — App Icon</title>
+<link rel="stylesheet" href="design-system/colors_and_type.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font-sans);
+    background: radial-gradient(1100px 560px at 50% -8%, #FFFFFF 0%, var(--cream-200) 62%);
+    min-height: 100vh;
+    color: var(--text-primary);
+    padding: 72px 32px 110px;
+  }
+  .page { max-width: 980px; margin: 0 auto; }
+
+  header.head { text-align: center; margin-bottom: 64px; }
+  .eyebrow { font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700; color: var(--text-tertiary); }
+  .head h1 { font-size: 40px; font-weight: 800; letter-spacing: -0.035em; margin: 14px 0 14px; }
+  .pick { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--blue-600);
+    background: #EAF1FE; border: 1px solid #D7E4FD; padding: 7px 14px; border-radius: 999px; }
+  .pick .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--blue-500); }
+
+  .stage { margin: 0 auto 30px; display: flex; flex-direction: column; align-items: center; gap: 30px;
+    padding: 64px 40px 56px; background: linear-gradient(180deg, #FFFFFF 0%, var(--cream-100) 100%);
+    border: 1px solid var(--border-subtle); border-radius: 32px; box-shadow: var(--shadow-raised); }
+  .hero-icon { filter: drop-shadow(0 24px 46px rgba(240,170,0,0.22)) drop-shadow(0 8px 18px rgba(17,24,39,0.10)); }
+  .icon { border-radius: 22.37%; overflow: hidden; display: block; background: #fff; }
+  .icon svg { display: block; }
+  .hero-cap { text-align: center; }
+  .hero-cap .kr { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; }
+  .hero-cap .en { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-tertiary); margin-top: 6px; font-weight: 600; }
+
+  .section { margin-top: 56px; }
+  .section > h2 { font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-tertiary);
+    font-weight: 700; margin: 0 0 20px; display: flex; align-items: center; gap: 12px; }
+  .section > h2::after { content: ""; flex: 1; height: 1px; background: var(--border-default); }
+
+  .card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 24px;
+    padding: 34px 32px; box-shadow: var(--shadow-card); }
+
+  .ladder { display: flex; align-items: flex-end; gap: 34px; flex-wrap: wrap; }
+  .ladder .slot { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .ladder .slot .px { font-size: 11px; color: var(--text-tertiary); font-variant-numeric: tabular-nums; font-weight: 600; }
+  .ladder .icon { box-shadow: 0 3px 9px rgba(17,24,39,0.12); }
+
+  .homes { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .phone { border-radius: 30px; padding: 26px 22px 30px; border: 1px solid rgba(255,255,255,0.4);
+    box-shadow: var(--shadow-raised); min-height: 280px; display: flex; flex-direction: column; }
+  .phone.ios  { background: linear-gradient(165deg, #cdd9ec 0%, #e7ddef 50%, #f3e6dc 100%); }
+  .phone.dark { background: linear-gradient(165deg, #20242e 0%, #2d3340 100%); }
+  .phone .ptime { font-size: 13px; font-weight: 700; letter-spacing: 0.02em; margin-bottom: 26px; }
+  .phone.ios  .ptime { color: rgba(30,32,40,0.85); }
+  .phone.dark .ptime { color: rgba(255,255,255,0.92); }
+  .apps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px 14px; }
+  .app { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+  .app .icon { box-shadow: 0 5px 13px rgba(17,24,39,0.22); }
+  .app .nm { font-size: 11px; font-weight: 500; letter-spacing: -0.01em; }
+  .phone.ios  .app .nm { color: rgba(30,32,40,0.82); }
+  .phone.dark .app .nm { color: rgba(255,255,255,0.86); }
+  .app .dummy { width: 54px; height: 54px; border-radius: 22.37%; }
+  .phone.ios  .app .dummy { background: rgba(255,255,255,0.42); }
+  .phone.dark .app .dummy { background: rgba(255,255,255,0.10); }
+
+  .shapes { display: flex; gap: 30px; flex-wrap: wrap; align-items: flex-end; }
+  .shape { display: flex; flex-direction: column; align-items: center; gap: 11px; }
+  .shape .lbl { font-size: 11px; color: var(--text-tertiary); font-weight: 600; }
+  .shape .icon { box-shadow: 0 6px 16px rgba(17,24,39,0.14); }
+  .icon.squircle { border-radius: 22.37%; }
+  .icon.round    { border-radius: 50%; }
+  .icon.rounded  { border-radius: 16%; }
+  .icon.square   { border-radius: 0; }
+
+  .exports { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .dl { font-family: var(--font-sans); font-size: 12.5px; font-weight: 600; color: var(--text-primary);
+    background: var(--cream-200); border: 1px solid var(--border-default); padding: 11px 18px; border-radius: 999px;
+    cursor: pointer; transition: background var(--dur-fast) var(--ease-standard), transform var(--dur-fast) var(--ease-standard); }
+  .dl:hover { background: var(--cream-300); }
+  .dl:active { transform: translateY(1px); }
+  .note { margin-top: 18px; font-size: 12.5px; color: var(--text-tertiary); line-height: 1.7; text-wrap: pretty; max-width: 640px; }
+  .note strong { color: var(--text-secondary); font-weight: 600; }
+
+  @media (max-width: 720px) { .homes { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="head">
+    <div class="eyebrow">FortunePaper · 포츈페이퍼</div>
+    <h1>앱 아이콘</h1>
+    <div class="pick"><span class="dot"></span>선택안 A — 시그니처 심볼</div>
+  </header>
+
+  <div class="stage">
+    <div class="hero-icon"><div class="icon" id="hero" style="width:268px;height:268px;"></div></div>
+    <div class="hero-cap">
+      <div class="kr">화창한 해 — 브랜드 최고 등급</div>
+      <div class="en">Signature Sun · Cream</div>
+    </div>
+  </div>
+
+  <section class="section">
+    <h2>크기별 가독성</h2>
+    <div class="card"><div class="ladder" id="ladder"></div></div>
+  </section>
+
+  <section class="section">
+    <h2>홈 화면</h2>
+    <div class="homes" id="homes"></div>
+  </section>
+
+  <section class="section">
+    <h2>플랫폼 마스크</h2>
+    <div class="card">
+      <div class="shapes" id="shapes"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>내보내기</h2>
+    <div class="card">
+      <div class="exports" id="exports"></div>
+      <div class="note">앱 스토어 제출용 원본은 모서리 라운딩이 없는 <strong>1024×1024 정사각형</strong>입니다. iOS는 시스템이 슈퍼타원(squircle) 마스크를 자동 적용합니다.</div>
+    </div>
+  </section>
+</div>
+
+<script>
+const SIZE = 1024;
+
+/* A — signature glossy sun on cream */
+function sunSVG(uid) {
+  let rays = '';
+  for (let i = 0; i < 8; i++) {
+    rays += `<g transform="rotate(${i*45} 512 512)"><rect x="486" y="150" width="52" height="130" rx="26" fill="url(#${uid}-ray)"/></g>`;
+  }
+  return `
+  <svg width="100%" height="100%" viewBox="0 0 ${SIZE} ${SIZE}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="${uid}-bg" x1="0" y1="0" x2="0.25" y2="1">
+        <stop offset="0%" stop-color="#FCFBF7"/><stop offset="100%" stop-color="#EDEBE0"/>
+      </linearGradient>
+      <radialGradient id="${uid}-body" cx="40%" cy="32%" r="72%">
+        <stop offset="0%" stop-color="#FFF7C6"/><stop offset="52%" stop-color="#FFD63A"/><stop offset="100%" stop-color="#F0AE00"/>
+      </radialGradient>
+      <linearGradient id="${uid}-ray" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#FFE27A"/><stop offset="100%" stop-color="#FBB400"/>
+      </linearGradient>
+      <radialGradient id="${uid}-glow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#FFD23A" stop-opacity="0.34"/><stop offset="100%" stop-color="#FFD23A" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="${uid}-hi" cx="36%" cy="30%" r="46%">
+        <stop offset="0%" stop-color="#fff" stop-opacity="0.9"/><stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="${SIZE}" height="${SIZE}" fill="url(#${uid}-bg)"/>
+    <circle cx="512" cy="512" r="380" fill="url(#${uid}-glow)"/>
+    <g>${rays}</g>
+    <circle cx="512" cy="512" r="176" fill="url(#${uid}-body)"/>
+    <ellipse cx="458" cy="456" rx="80" ry="56" fill="url(#${uid}-hi)"/>
+  </svg>`;
+}
+
+function iconEl(svgStr, px, shapeClass) {
+  const d = document.createElement('div');
+  d.className = 'icon' + (shapeClass ? ' ' + shapeClass : '');
+  d.style.width = px + 'px'; d.style.height = px + 'px';
+  d.innerHTML = svgStr;
+  return d;
+}
+
+function exportPNG(svgStr, filename) {
+  const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement('canvas'); c.width = SIZE; c.height = SIZE;
+    c.getContext('2d').drawImage(img, 0, 0, SIZE, SIZE);
+    URL.revokeObjectURL(url);
+    c.toBlob(png => { const a = document.createElement('a'); a.href = URL.createObjectURL(png); a.download = filename; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000); }, 'image/png');
+  };
+  img.src = url;
+}
+
+document.getElementById('hero').innerHTML = sunSVG('hero');
+
+const ladderSvg = sunSVG('lad');
+const ladRoot = document.getElementById('ladder');
+[128, 96, 64, 48, 32].forEach(px => {
+  const slot = document.createElement('div'); slot.className = 'slot';
+  slot.appendChild(iconEl(ladderSvg, px, 'squircle'));
+  const lbl = document.createElement('div'); lbl.className = 'px'; lbl.textContent = px + 'px';
+  slot.appendChild(lbl);
+  ladRoot.appendChild(slot);
+});
+
+const homesRoot = document.getElementById('homes');
+function buildPhone(cls, time) {
+  const p = document.createElement('div'); p.className = 'phone ' + cls;
+  const t = document.createElement('div'); t.className = 'ptime'; t.textContent = time; p.appendChild(t);
+  const apps = document.createElement('div'); apps.className = 'apps';
+  ['d','d','d','fp','d','d','d','d'].forEach(kind => {
+    const app = document.createElement('div'); app.className = 'app';
+    if (kind === 'fp') {
+      app.appendChild(iconEl(sunSVG('hs-' + cls), 54, 'squircle'));
+      const nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = '포츈페이퍼'; app.appendChild(nm);
+    } else {
+      const dummy = document.createElement('div'); dummy.className = 'dummy'; app.appendChild(dummy);
+      const nm = document.createElement('div'); nm.className = 'nm'; nm.style.opacity = '0'; nm.textContent = '·'; app.appendChild(nm);
+    }
+    apps.appendChild(app);
+  });
+  p.appendChild(apps);
+  return p;
+}
+homesRoot.appendChild(buildPhone('ios', '9:41'));
+homesRoot.appendChild(buildPhone('dark', '9:41'));
+
+const shapesRoot = document.getElementById('shapes');
+const shapeSvg = sunSVG('shp');
+[{c:'squircle',l:'iOS · 슈퍼타원'},{c:'round',l:'원형'},{c:'rounded',l:'둥근사각'},{c:'square',l:'원본 1024'}].forEach(s => {
+  const wrap = document.createElement('div'); wrap.className = 'shape';
+  wrap.appendChild(iconEl(shapeSvg, 96, s.c));
+  const lbl = document.createElement('div'); lbl.className = 'lbl'; lbl.textContent = s.l;
+  wrap.appendChild(lbl);
+  shapesRoot.appendChild(wrap);
+});
+
+const exRoot = document.getElementById('exports');
+const btn = document.createElement('button'); btn.className = 'dl'; btn.textContent = '↓ PNG 1024 내보내기';
+btn.addEventListener('click', () => exportPNG(sunSVG('exp'), 'fortunepaper-icon-1024.png'));
+exRoot.appendChild(btn);
+</script>
+</body>
+</html>

@@ -70,7 +70,7 @@ function HeroGrade({ grade = 'SUNNY', dateText = '2026. 05. 23 · 토요일', na
       )}
       <div style={{ position: 'relative', width: 200, height: 200, marginTop: 8 }}>
         <img
-          src={`design-system/assets/grade-${grade.toLowerCase()}.svg`}
+          src={(window.__resources && window.__resources['grade' + grade.charAt(0) + grade.slice(1).toLowerCase()]) || `design-system/assets/grade-${grade.toLowerCase()}.svg`}
           width="200" height="200"
           style={{ filter: `drop-shadow(0 20px 28px ${g.color}55)` }}
           alt={g.kr}
