@@ -7,9 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8A8E3EDA2FD1B4C3008FCD2B /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 8A8E3ED92FD1B4C3008FCD2B /* KakaoSDKAuth */; };
-		8A8E3EDC2FD1B4C3008FCD2B /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 8A8E3EDB2FD1B4C3008FCD2B /* KakaoSDKCommon */; };
-		8A8E3EDE2FD1B4C3008FCD2B /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = 8A8E3EDD2FD1B4C3008FCD2B /* KakaoSDKUser */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,9 +44,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8A8E3EDC2FD1B4C3008FCD2B /* KakaoSDKCommon in Frameworks */,
-				8A8E3EDA2FD1B4C3008FCD2B /* KakaoSDKAuth in Frameworks */,
-				8A8E3EDE2FD1B4C3008FCD2B /* KakaoSDKUser in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -94,9 +88,6 @@
 			);
 			name = iosApp;
 			packageProductDependencies = (
-				8A8E3ED92FD1B4C3008FCD2B /* KakaoSDKAuth */,
-				8A8E3EDB2FD1B4C3008FCD2B /* KakaoSDKCommon */,
-				8A8E3EDD2FD1B4C3008FCD2B /* KakaoSDKUser */,
 			);
 			productName = iosApp;
 			productReference = 31402A526632524FBF1AEC8A /* FortuneReport.app */;
@@ -127,7 +118,6 @@
 			mainGroup = 0970E65552776E817F336F4C;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				8A8E3ED82FD1B4C3008FCD2B /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 614000D9CB7CF54E737AB61D /* Products */;
@@ -384,34 +374,6 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		8A8E3ED82FD1B4C3008FCD2B /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/kakao/kakao-ios-sdk";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.27.3;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		8A8E3ED92FD1B4C3008FCD2B /* KakaoSDKAuth */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8A8E3ED82FD1B4C3008FCD2B /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
-			productName = KakaoSDKAuth;
-		};
-		8A8E3EDB2FD1B4C3008FCD2B /* KakaoSDKCommon */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8A8E3ED82FD1B4C3008FCD2B /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
-			productName = KakaoSDKCommon;
-		};
-		8A8E3EDD2FD1B4C3008FCD2B /* KakaoSDKUser */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8A8E3ED82FD1B4C3008FCD2B /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
-			productName = KakaoSDKUser;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D0D6B837CC8F68D0E7349A27 /* Project object */;
 }
