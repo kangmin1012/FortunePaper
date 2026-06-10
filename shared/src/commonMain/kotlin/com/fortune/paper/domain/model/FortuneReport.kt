@@ -1,11 +1,11 @@
 package com.fortune.paper.domain.model
 
+/** 오늘의 운세 리포트 (v1.1 — 서버 레코드 개념 제거, id 없음) */
 data class FortuneReport(
-    val id: String,
+    val date: String,
     val grade: FortuneGrade,
     val summary: String,
     val advice: String,
-    val date: String
 )
 
 enum class FortuneGrade {

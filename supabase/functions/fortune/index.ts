@@ -1,15 +1,13 @@
-// Supabase Edge Function: fortune
-// 사주(생년월일·성별·태어난 시각) 기반으로 오늘의 운세 리포트를 생성한다.
-//   - 당일 캐시가 있으면 그대로 반환 (하루 1회 생성)
-//   - 없으면 Gemini API 호출 → { grade, summary, advice } → fortunes 테이블 저장 후 반환
-//   - fortunes 는 1일 보관: 새 리포트 생성 시 해당 유저의 과거 레코드 삭제
+// Supabase Edge Function: fortune (v1.1 — stateless)
+// 요청의 사주 정보(생년월일·성별·태어난 시각)로 Gemini를 호출해 오늘의 운세 리포트를 반환한다.
+//   - DB 미사용: 어떤 유저 데이터도 저장하지 않는다 (캐시는 클라이언트 로컬 DataStore가 담당)
+//   - verify_jwt = false 로 배포 (Supabase Auth 제거 — 게이트웨이 apikey 검사는 유지)
+//
+// 요청:  { "birth_date": "1995-01-01", "gender": "MALE", "birth_time": "자" | null }
+// 응답:  { "date": "2026-06-10", "grade": "SUNNY", "summary": "...", "advice": "..." }
 //
 // 필요한 Edge Function 환경변수:
 //   GEMINI_API_KEY — Google AI Studio API 키 (필수)
-//   (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY 는 자동 주입)
-
-import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,6 +16,10 @@ const corsHeaders = {
 };
 
 const ALLOWED_GRADES = ["SUNNY", "CLEAR", "CLOUDY", "RAINY", "STORM"];
+const ALLOWED_GENDERS = ["MALE", "FEMALE"];
+const ALLOWED_BIRTH_TIMES = [
+  "자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해",
+];
 const GEMINI_MODEL = "gemini-1.5-flash";
 
 // KST(Asia/Seoul) 기준 오늘 날짜 (YYYY-MM-DD)
@@ -32,7 +34,7 @@ function buildPrompt(
   birthTime: string | null,
   date: string,
 ): string {
-  const genderKo = gender === "MALE" ? "남성" : gender === "FEMALE" ? "여성" : gender;
+  const genderKo = gender === "MALE" ? "남성" : "여성";
   const timeKo = birthTime
     ? `${birthTime}시 (12지시)`
     : "미상 — 정오(午)를 대표값으로 가정";
@@ -115,7 +117,7 @@ async function callGemini(prompt: string): Promise<FortuneResult> {
   };
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -127,62 +129,32 @@ serve(async (req) => {
     });
 
   try {
-    const { user_id } = await req.json();
-    if (!user_id) return json({ error: "user_id required" }, 400);
+    const { birth_date, gender, birth_time } = await req.json();
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const admin = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    });
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(birth_date ?? ""))) {
+      return json({ error: "birth_date(YYYY-MM-DD) required" }, 400);
+    }
+    if (!ALLOWED_GENDERS.includes(String(gender ?? ""))) {
+      return json({ error: "gender(MALE|FEMALE) required" }, 400);
+    }
+    const birthTime = birth_time == null || birth_time === ""
+      ? null
+      : String(birth_time);
+    if (birthTime !== null && !ALLOWED_BIRTH_TIMES.includes(birthTime)) {
+      return json({ error: "birth_time must be one of 12지지 (자~해) or null" }, 400);
+    }
 
     const date = todayKst();
-
-    // 1. 당일 캐시 확인
-    const { data: cached } = await admin
-      .from("fortunes")
-      .select("*")
-      .eq("user_id", user_id)
-      .eq("date", date)
-      .maybeSingle();
-    if (cached) return json(cached);
-
-    // 2. 사주 계산에 필요한 사용자 정보 조회
-    const { data: user, error: userError } = await admin
-      .from("users")
-      .select("birth_date, gender, birth_time")
-      .eq("id", user_id)
-      .maybeSingle();
-    if (userError) throw userError;
-    if (!user) return json({ error: "사용자를 찾을 수 없습니다" }, 404);
-
-    // 3. Gemini 호출
-    const prompt = buildPrompt(
-      user.birth_date,
-      user.gender,
-      user.birth_time ?? null,
-      date,
+    const result = await callGemini(
+      buildPrompt(String(birth_date), String(gender), birthTime, date),
     );
-    const result = await callGemini(prompt);
 
-    // 4. 1일 보관: 이 유저의 과거 리포트 삭제
-    await admin.from("fortunes").delete().eq("user_id", user_id).neq("date", date);
-
-    // 5. 신규 리포트 저장 후 반환 (FortuneDto 형태)
-    const { data: inserted, error: insertError } = await admin
-      .from("fortunes")
-      .insert({
-        user_id,
-        date,
-        grade: result.grade,
-        summary: result.summary,
-        advice: result.advice,
-      })
-      .select("*")
-      .single();
-    if (insertError) throw insertError;
-
-    return json(inserted);
+    return json({
+      date,
+      grade: result.grade,
+      summary: result.summary,
+      advice: result.advice,
+    });
   } catch (error) {
     console.error("fortune error:", error);
     return json({ error: (error as Error).message ?? "Internal server error" }, 500);

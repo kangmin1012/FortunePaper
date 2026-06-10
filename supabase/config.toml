@@ -1,0 +1,8 @@
+# Supabase CLI 설정 — Edge Function 배포 옵션
+# v1.1: Supabase Auth 제거로 사용자 JWT가 없으므로 fortune은 verify_jwt = false 로 배포한다.
+# (게이트웨이의 apikey 검사는 유지 — publishable key 필요)
+
+project_id = "FortunePaper"
+
+[functions.fortune]
+verify_jwt = false
