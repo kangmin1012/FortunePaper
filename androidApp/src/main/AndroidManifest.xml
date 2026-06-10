@@ -2,11 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
-
-    <!-- 카카오톡 설치 여부 확인 -->
-    <queries>
-        <package android:name="com.kakao.talk" />
-    </queries>
+    <!-- 로컬 알림 (API 33+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- 재부팅 시 알람 재예약 -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name=".FortuneApp"
@@ -26,19 +25,19 @@
             </intent-filter>
         </activity>
 
-        <!-- 카카오 로그인 리다이렉트 처리 -->
-        <activity
-            android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
-            android:exported="true">
+        <!-- 매일 알림: 알람 수신 → 알림 표시 → 익일 재예약 -->
+        <receiver
+            android:name="com.fortune.paper.platform.notification.DailyFortuneAlarmReceiver"
+            android:exported="false" />
+
+        <!-- 재부팅 시 알람 재예약 -->
+        <receiver
+            android:name="com.fortune.paper.platform.notification.BootCompletedReceiver"
+            android:exported="false">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="kakao${kakaoNativeAppKey}"
-                    android:host="oauth" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
-        </activity>
+        </receiver>
 
     </application>
 
