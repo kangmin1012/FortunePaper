@@ -1,15 +1,17 @@
 package com.fortune.paper
 
-import com.fortune.paper.auth.KakaoAuth
-import com.fortune.paper.auth.KakaoAuthBridge
-import com.fortune.paper.auth.KakaoBridgeHolder
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import com.fortune.paper.data.local.createDataStore
 import com.fortune.paper.data.remote.SupabaseClientProvider
 import com.fortune.paper.di.appModules
+import com.fortune.paper.platform.notification.LocalNotifier
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
-private val iosAuthModule = module {
-    single<KakaoAuth> { KakaoAuth() }
+private val platformModule = module {
+    single<DataStore<Preferences>> { createDataStore() }
+    single { LocalNotifier() }
 }
 
 /**
@@ -22,11 +24,9 @@ private val iosAuthModule = module {
 fun startApp(
     supabaseUrl: String,
     supabaseAnonKey: String,
-    kakaoBridge: KakaoAuthBridge
 ) {
-    KakaoBridgeHolder.bridge = kakaoBridge
     SupabaseClientProvider.initialize(url = supabaseUrl, anonKey = supabaseAnonKey)
     startKoin {
-        modules(appModules + iosAuthModule)
+        modules(appModules + platformModule)
     }
 }

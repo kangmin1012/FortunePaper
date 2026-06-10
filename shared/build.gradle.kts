@@ -43,7 +43,6 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.ktor.client.okhttp)
-            implementation(libs.kakao.user)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -75,10 +74,11 @@ kotlin {
             // Ktor
             implementation(libs.ktor.client.core)
 
-            // Supabase
-            implementation(libs.supabase.postgrest)
-            implementation(libs.supabase.auth)
+            // Supabase (fortune Edge Function 호출용)
             implementation(libs.supabase.functions)
+
+            // DataStore — 로컬 프로필·알림 설정·운세 캐시
+            implementation(libs.androidx.datastore.preferences.core)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

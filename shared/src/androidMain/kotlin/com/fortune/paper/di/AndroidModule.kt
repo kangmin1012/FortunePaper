@@ -1,8 +1,14 @@
 package com.fortune.paper.di
 
-import com.fortune.paper.auth.KakaoAuth
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import com.fortune.paper.data.local.createDataStore
+import com.fortune.paper.platform.notification.LocalNotifier
+import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
-val androidAuthModule = module {
-    single<KakaoAuth> { KakaoAuth() }
+/** 플랫폼 API가 필요한 의존성만 제공 (DataStore, LocalNotifier). */
+val platformModule = module {
+    single<DataStore<Preferences>> { createDataStore(androidContext()) }
+    single { LocalNotifier(androidContext()) }
 }
