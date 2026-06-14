@@ -247,7 +247,7 @@ App() → userRepository.observeProfile(): Flow<UserProfile?>
       → DataStore 캐시 저장 후 반환
 ```
 
-- Edge Function은 `verify_jwt = false`로 배포 (Supabase Auth 제거로 사용자 JWT 부재. 게이트웨이 apikey 검사는 유지).
+- Edge Function은 `verify_jwt = false`로 배포 (Supabase Auth 제거로 사용자 JWT 부재). ⚠️ **실측 결과(2026-06-14): `verify_jwt = false`는 게이트웨이 apikey 검사까지 비활성화한다** — apikey 없이도 함수 도달. fortune은 사실상 공개 무인증 엔드포인트이며, 남용 대응은 PRD §12(rate limit/디바이스 ID 캐시)로 이연.
 - 서버는 요청을 저장하지 않는다 — DB·supabase-js 미사용.
 - `birth_time`이 null이면 서버 프롬프트가 정오 대표값으로 처리.
 
@@ -255,12 +255,16 @@ App() → userRepository.observeProfile(): Flow<UserProfile?>
 ```json
 // 요청
 { "birth_date": "1995-01-01", "gender": "MALE", "birth_time": "자" }
-// 응답
+// 응답 (200)
 { "date": "2026-06-10", "grade": "SUNNY", "summary": "한 문장 (20자 이내)", "advice": "오늘의 조언 (50자 이내)" }
+// Gemini 무료 티어 한도 초과 (429)
+{ "error": "RATE_LIMITED" }
 ```
 grade 허용값: `SUNNY | CLEAR | CLOUDY | RAINY | STORM` (날씨 5단계, 자세한 톤 가이드 → `prd.md` 5절)
 
-> **현재 사용 AI**: Gemini API (Google AI Studio 무료 티어 — Gemini 1.5 Flash)
+> **429 처리**: Gemini가 429(RPM/RPD 한도 초과)를 반환하면 함수는 다른 오류(500)와 구분해 **HTTP 429 + `{ "error": "RATE_LIMITED" }`** 로 응답한다. 앱(`FortuneRemoteDataSource`)은 이를 `FortuneRateLimitedException`으로 변환하고, 리포트 화면이 "오늘 하루 용지가 다 떨어졌어요😢" 다이얼로그(`OutOfPaperDialog`)로 안내한다. 그 외 오류는 기존대로 인라인 `ErrorReport`(재시도).
+
+> **현재 사용 AI**: Gemini API (Google AI Studio 무료 티어 — Gemini 2.5 Flash)
 > 출시 전 Claude API 교체 검토. API 호출부는 Edge Function에 격리되어 있어 교체 시 앱 코드 변경 없음.
 
 ### 로컬 알림 흐름 (v1.1 — 서버 푸시 없음)

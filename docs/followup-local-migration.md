@@ -7,47 +7,42 @@
 
 ---
 
-## 1. 원격(Supabase) 작업 — 수동 수행 필요
+## 1. 원격(Supabase) 작업
 
-이 세션에서는 프로덕션 배포 권한이 차단되어 로컬 코드 작업까지만 완료했다. 아래 명령을 직접 실행해야 한다.
+> **✅ 1.1 · 1.2 · 1.3 완료 (2026-06-14).** 1.4 · 1.5는 대시보드 전용 작업으로 잔존.
 
-### 1.1 fortune Edge Function 배포 (stateless 개편본)
+### 1.1 fortune Edge Function 배포 (stateless 개편본) — ✅ 완료 (2026-06-14)
 
 ```bash
-supabase functions deploy fortune --project-ref zvqecylagvkznetltlpu --no-verify-jwt
+supabase functions deploy fortune --project-ref zvqecylagvkznetltlpu
 ```
 
-- `supabase/config.toml`에 `[functions.fortune] verify_jwt = false`가 이미 설정되어 있으므로 `--no-verify-jwt` 플래그 없이도 동일하게 동작한다.
-- **배포 후 스모크 테스트**:
+- `supabase/config.toml`에 `[functions.fortune] verify_jwt = false`가 이미 설정되어 있어 `--no-verify-jwt` 없이 배포됨. 현재 ACTIVE v3.
+- **모델 교체**: 배포 후 첫 호출에서 `gemini-1.5-flash`가 404(구글 retire)로 실패 → `gemini-2.5-flash`로 교체 후 재배포하여 정상 생성 확인.
+- **스모크 테스트 결과**:
   ```bash
   URL="https://zvqecylagvkznetltlpu.supabase.co/functions/v1/fortune"
   ANON="sb_publishable_..."   # local.properties의 supabase.publishableKey
-
-  # ① apikey 포함 → 200 + { date, grade, summary, advice }
   curl -s -X POST "$URL" -H "apikey: $ANON" -H "Content-Type: application/json" \
     -d '{"birth_date":"1995-01-01","gender":"MALE","birth_time":"자"}'
-
-  # ② apikey 미포함 → 401 (게이트웨이 차단)
-  curl -s -o /dev/null -w "%{http_code}" -X POST "$URL" \
-    -H "Content-Type: application/json" -d '{}'
+  # → 200 { "date":"2026-06-14","grade":"CLEAR","summary":"...","advice":"..." }  (birth_time null 도 정상)
   ```
+- ⚠️ **보안 발견**: `verify_jwt = false`는 Supabase 게이트웨이의 **apikey 검사까지 비활성화**한다. apikey 없이 보낸 요청도 함수에 도달(우리 함수의 400 검증 응답 반환)하므로, fortune 엔드포인트는 사실상 **공개 무인증** 상태다. architecture.md/spec의 "게이트웨이 apikey 검사는 유지" 서술은 사실과 다르며 정정함. PRD §12("Gemini 호출 남용 실측 시 rate limit/디바이스 ID 캐시 검토")가 이 위험을 이미 수용 항목으로 다룬다 — 출시 후 남용 모니터링 필요.
 
-### 1.2 kakao-auth 원격 함수 삭제
+### 1.2 kakao-auth 원격 함수 삭제 — ✅ 완료 (이미 부재 확인)
 
 ```bash
 supabase functions delete kakao-auth --project-ref zvqecylagvkznetltlpu
+# → "Function kakao-auth does not exist ... nothing to delete" (원격에 이미 없음)
 ```
 
-(로컬 `supabase/functions/kakao-auth/` 디렉토리는 이미 삭제됨)
+원격 함수 목록은 `fortune`(ACTIVE v3)·`ping-db`만 잔존 — 정상.
 
-### 1.3 users·fortunes 테이블 DROP
+### 1.3 users·fortunes 테이블 DROP — ✅ 완료 (2026-06-14)
 
-마이그레이션 파일 작성 완료: `supabase/migrations/20260610120000_drop_users_and_fortunes.sql`
+마이그레이션 `supabase/migrations/20260610120000_drop_users_and_fortunes.sql`을 `supabase db push --linked`로 원격 적용. 마이그레이션 히스토리에 `20260610120000` 기록 확인, "Remote database is up to date".
 
-- 적용 방법 ①: Supabase 대시보드 SQL Editor에서 해당 SQL 실행 (기존 마이그레이션과 동일 방식)
-- 적용 방법 ②: `supabase link` 후 `supabase db push`
-
-### 1.4 Supabase Auth 기존 사용자 정리
+### 1.4 Supabase Auth 기존 사용자 정리 — ⬜ 대시보드 전용 (잔존)
 
 대시보드 → Authentication → Users에서 기존 카카오 연동 사용자 삭제.
 
@@ -61,8 +56,9 @@ supabase functions delete kakao-auth --project-ref zvqecylagvkznetltlpu
 
 ## 2. 배포 후 검증 (Task 8.5 이관 항목)
 
-- [ ] **실제 Gemini 생성 e2e** — 1.1 배포 후 앱에서 온보딩 → 리포트 화면 진입 → 실 운세 생성 확인
-  (Task 4부터 이월된 항목. stateless 개편본 기준으로 검증해야 한다)
+- [x] **Gemini 생성 e2e (서버 레벨)** — 1.1 배포본에 직접 curl로 실 운세 생성 확인 (birth_time 유/무 모두 200 + 정상 JSON, 2026-06-14).
+- [ ] **앱 레벨 e2e (선택)** — 실기기/시뮬레이터에서 온보딩 → 리포트 화면 진입 → 실 생성·캐시 저장까지 확인. 서버는 검증됐으므로 앱 통합 경로 최종 확인용.
+  - 참고: 함수가 `summary`를 40자, `advice`를 80자로 클램프하지만 프롬프트는 20/50자를 요구한다. Gemini가 종종 50자를 초과(예: advice ~60자) → 리포트 카드 레이아웃에서 길이 확인 권장. 엄격 준수 필요 시 프롬프트 강화 또는 클램프 하향.
 
 ---
 

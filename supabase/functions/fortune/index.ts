@@ -20,7 +20,7 @@ const ALLOWED_GENDERS = ["MALE", "FEMALE"];
 const ALLOWED_BIRTH_TIMES = [
   "자", "축", "인", "묘", "진", "사", "오", "미", "신", "유", "술", "해",
 ];
-const GEMINI_MODEL = "gemini-1.5-flash";
+const GEMINI_MODEL = "gemini-2.5-flash";
 
 // KST(Asia/Seoul) 기준 오늘 날짜 (YYYY-MM-DD)
 function todayKst(): string {
@@ -70,6 +70,9 @@ interface FortuneResult {
   advice: string;
 }
 
+// Gemini 무료 티어 한도 초과(429) 전용 에러 — 클라이언트가 "용지 소진" 안내를 띄울 수 있도록 구분한다.
+class RateLimitedError extends Error {}
+
 async function callGemini(prompt: string): Promise<FortuneResult> {
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey) throw new Error("GEMINI_API_KEY 가 설정되지 않았습니다");
@@ -98,6 +101,10 @@ async function callGemini(prompt: string): Promise<FortuneResult> {
     }),
   });
 
+  if (res.status === 429) {
+    // 무료 티어 RPM/RPD 한도 초과 — 본문은 무시하고 전용 에러로 올린다.
+    throw new RateLimitedError("RATE_LIMITED");
+  }
   if (!res.ok) {
     const detail = await res.text();
     throw new Error(`Gemini API 오류 (${res.status}): ${detail}`);
@@ -156,6 +163,10 @@ Deno.serve(async (req) => {
       advice: result.advice,
     });
   } catch (error) {
+    if (error instanceof RateLimitedError) {
+      // 429 + 구분 코드 → 앱이 "오늘 용지가 다 떨어졌어요" 다이얼로그를 띄운다.
+      return json({ error: "RATE_LIMITED" }, 429);
+    }
     console.error("fortune error:", error);
     return json({ error: (error as Error).message ?? "Internal server error" }, 500);
   }

@@ -1,5 +1,6 @@
 package com.fortune.paper.data.remote
 
+import com.fortune.paper.domain.model.FortuneRateLimitedException
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.functions.functions
 import io.ktor.client.call.body
@@ -33,6 +34,8 @@ class FortuneRemoteDataSource(private val client: SupabaseClient) {
                 else put("birth_time", JsonNull)
             },
         )
+        // 무료 티어 한도 초과 → 전용 예외로 변환 (리포트 화면이 "용지 소진" 다이얼로그로 안내).
+        if (response.status.value == 429) throw FortuneRateLimitedException()
         return response.body<FortuneDto>()
     }
 }

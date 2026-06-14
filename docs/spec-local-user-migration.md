@@ -55,7 +55,7 @@ v1.0은 카카오 로그인 → Supabase Auth 계정 → 서버 DB(`users` 테�
 | D2 | 운세 캐시 | 서버(`fortunes` 테이블) 캐시 폐기 → **로컬 DataStore 캐시 단일화**. 캐시에 `date`(KST) 포함, 오늘과 불일치 시 재생성 | 서버 완전 stateless화로 DB/RLS 관리 소멸 (§4.1 트레이드오프) |
 | D3 | fortune 요청 스펙 | `{ user_id }` → `{ birth_date, gender, birth_time }`. `name`은 프롬프트 미사용이므로 전송 안 함 | 서버에 유저 없음, 개인정보 최소화 |
 | D4 | fortune 응답 스펙 | `{ date, grade, summary, advice }` — `id`/`user_id`/`created_at` 제거 | DB 레코드 개념 소멸 |
-| D5 | Edge Function 인증 | `verify_jwt = false`로 배포. Supabase 게이트웨이의 apikey 검사는 유지 | Auth 제거로 사용자 JWT 부재. publishable key는 JWT가 아니라 verify_jwt 게이트 통과 불가 |
+| D5 | Edge Function 인증 | `verify_jwt = false`로 배포 → ⚠️ **실측(2026-06-14): apikey 게이트도 함께 비활성화되어 무인증 공개 엔드포인트가 됨** (당초 "apikey 검사 유지" 가정은 오류). 남용 대응은 PRD §12로 이연 | Auth 제거로 사용자 JWT 부재 |
 | D6 | 프로필 수정 | **설정 화면에서 수정 가능** (v1.0의 "수정 불가, 탈퇴 후 재가입" 정책 폐기) | 신규 요구사항 |
 | D7 | 수정 시 캐시 무효화 | 사주 입력값(생년월일·성별·시진) 변경 시에만 당일 운세 캐시 삭제 → 재생성. **이름만 변경 시 유지** | 사주가 바뀌면 운세도 바뀌어야 신뢰성 유지. "하루 1회 생성" 원칙의 명시적 예외 |
 | D8 | 알림 방식 | Firebase/FCM/pg_cron 폐기 → **로컬 알림**. Android: `AlarmManager.setAndAllowWhileIdle`(inexact) + 발송 후 재예약 + `BOOT_COMPLETED` 재예약 + `POST_NOTIFICATIONS` 권한. iOS: `UNCalendarNotificationTrigger(repeats: true)` | §4.2 트레이드오프 |

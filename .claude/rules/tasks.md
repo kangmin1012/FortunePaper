@@ -124,7 +124,7 @@
 > ⚠️ **v1.1 개편 예정** — Edge Function의 DB 캐시·user_id 조회는 Task 8.4에서 stateless 방식으로 교체된다.
 
 - [x] Supabase Edge Function `fortune` 작성 (Deno/TypeScript) — `supabase/functions/fortune/index.ts`
-  - [x] Gemini API 호출 로직 (gemini-1.5-flash, responseSchema로 JSON 강제)
+  - [x] Gemini API 호출 로직 (gemini-2.5-flash, responseSchema로 JSON 강제) — gemini-1.5-flash는 구글 retire로 404, 2026-06-14 교체
   - [x] `{ grade, summary, advice }` JSON 응답 (등급 화이트리스트 검증·길이 클램프)
   - [x] DB 저장 및 캐시 반환 로직 (당일 캐시 hit 반환 / 1일 보관: 과거 레코드 삭제 후 insert)
   - [x] `birth_time` 프롬프트 반영 (user_id로 서버 조회, null이면 정오 대표값) — PRD §8 연계 항목 해소
@@ -206,22 +206,22 @@
 - [x] `SubmitOnboarding` 전환 — 필수값 검증 → `saveProfile`(로컬) + 알림 설정 저장 + 권한 요청·알림 예약 → `NavigateToMain`
 - [x] `App.kt` 분기 교체 — `sessionStatus` 감시 → `observeProfile()` Flow (Loading → 부재=온보딩 / 존재=리포트·설정, 초기화 시 Flow null 방출로 자동 복귀)
 
-### Task 8.4. fortune Edge Function stateless 개편 — 🔄 코드 완료, 원격 배포 대기
+### Task 8.4. fortune Edge Function stateless 개편 — ✅ 완료 (배포 2026-06-14, ACTIVE v3)
 
 > 원격 작업 절차 → [`docs/followup-local-migration.md`](../../docs/followup-local-migration.md)
 
 - [x] 요청 스펙 변경 — `{ user_id }` → `{ birth_date, gender, birth_time }` (name 미전송, 입력값 검증 추가)
 - [x] 응답 스펙 변경 — `{ date, grade, summary, advice }` (id/user_id/created_at 제거)
 - [x] DB 캐시 조회·insert·삭제 및 supabase-js 의존 제거 (Gemini 호출 + 검증·클램프만 잔존)
-- [ ] `verify_jwt = false` **배포** + 스모크 테스트 (apikey 포함 200 / 미포함 401) — `supabase/config.toml` 작성 완료, **배포는 수동 수행 필요** (세션 내 프로덕션 배포 권한 차단)
-- [x] `kakao-auth` 로컬 디렉토리 삭제 — 원격 `supabase functions delete kakao-auth`는 수동 수행 필요
+- [x] `verify_jwt = false` **배포** + 스모크 테스트 — 2026-06-14 배포(ACTIVE v3). ⚠️ 실측: apikey 미포함도 함수 도달(verify_jwt=false가 apikey 게이트까지 끔, 무인증 공개 엔드포인트 — followup §1.1). 모델은 `gemini-1.5-flash` 404 → `gemini-2.5-flash` 교체.
+- [x] `kakao-auth` 삭제 — 로컬 디렉토리 삭제 완료 + 원격은 이미 부재 확인(2026-06-14)
 
-### Task 8.5. 리포트 흐름 전환 (8.2 + 8.4 의존) — 🔄 코드 완료, e2e는 배포 후
+### Task 8.5. 리포트 흐름 전환 (8.2 + 8.4 의존) — ✅ 서버 e2e 완료 (앱 통합 e2e 선택 잔존)
 
 - [x] `FortuneDto`·`FortuneRemoteDataSource` 신스펙 반영 (postgrest 캐시 조회 제거, functions.invoke만)
 - [x] `FortuneRepositoryImpl` 재구현 — 로컬 캐시 `date == 오늘(KST)` 시 반환(재호출 금지 강제) / 미스 시 프로필 읽어 호출 후 캐시 저장
 - [x] `FortuneRepository`에 `invalidateCache()` 추가 (8.7 프로필 수정 연계) + `FortuneReport` 도메인 모델에서 `id` 제거
-- [ ] **실제 Gemini 생성 e2e 검증** — fortune 배포(8.4) 후 온보딩 → 리포트 화면에서 실 생성 확인 (`docs/followup-local-migration.md` §2)
+- [x] **Gemini 생성 e2e (서버)** — 배포본에 직접 curl 호출로 실 운세 생성 확인 (2026-06-14). 앱 레벨 통합 확인은 선택 잔존 (`docs/followup-local-migration.md` §2)
 
 ### Task 8.6. 카카오 · 서버 잔재 완전 제거 (8.3 + 8.5 완료 후)
 
@@ -231,7 +231,7 @@
 - [x] androidApp: `KakaoSdk.init`·`KakaoAuthHolder` 연결, Manifest의 kakao queries·AuthCodeHandlerActivity, gradle kakao 의존성·`KAKAO_NATIVE_APP_KEY` 제거
 - [x] iosApp: `KakaoAuthBridgeImpl.swift`, `iOSApp.swift`의 KakaoSDK/onOpenURL/브리지 인자, `Info.plist` kakao 스킴, `Secrets.xcconfig` 키, Xcode SPM `kakao-ios-sdk`(pbxproj) 제거 + 카카오 핀 남은 `Package.resolved` 삭제(재생성)
 - [x] `libs.versions.toml`: kakao·firebase·supabase-auth·supabase-postgrest 제거 (supabase-functions 유지)
-- [x] DB 정리: `users`·`fortunes` DROP 마이그레이션 작성 (`supabase/migrations/20260610120000_drop_users_and_fortunes.sql`) — [ ] **원격 적용 + Supabase Auth 기존 사용자 정리는 수동 수행 필요** (`docs/followup-local-migration.md` §1)
+- [x] DB 정리: `users`·`fortunes` DROP 마이그레이션 **원격 적용 완료** (`db push --linked`, 2026-06-14) — [ ] Supabase Auth 기존 카카오 사용자 정리는 대시보드에서 수동 수행 잔존 (`docs/followup-local-migration.md` §1.4)
 - [x] `local.properties`: `kakao.nativeAppKey` 제거 + **`supabase.secretKey` 제거 (secrets.md 위반 해소)** — 키 롤테이션은 대시보드에서 검토 (followup §1.5)
 - [x] Android(`assembleDebug`) + iOS(시뮬레이터, BUILD SUCCEEDED) 빌드 검증 (2026-06-10)
 

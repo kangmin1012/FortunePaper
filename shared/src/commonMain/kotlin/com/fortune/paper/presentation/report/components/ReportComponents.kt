@@ -25,9 +25,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.fortune.paper.domain.model.FortuneReport
 import com.fortune.paper.presentation.onboarding.components.FPButton
 import com.fortune.paper.presentation.onboarding.components.GradeStrip
@@ -197,6 +199,49 @@ fun ErrorReport(message: String, onRetry: () -> Unit) {
         )
         Spacer(Modifier.height(FortuneSpacing.xl))
         FPButton(text = "다시 시도", onClick = onRetry)
+    }
+}
+
+/** 2-1. Gemini 무료 티어 한도 초과 안내 다이얼로그 (브랜드 톤 "용지 소진"). */
+@Composable
+fun OutOfPaperDialog(onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = FortuneColors.bgSurface,
+        ) {
+            Column {
+                Column(
+                    modifier = Modifier.padding(horizontal = 22.dp, vertical = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text("📄", fontSize = 44.sp)
+                    Spacer(Modifier.height(FortuneSpacing.md))
+                    Text(
+                        "오늘 하루 용지가 다 떨어졌어요😢\n용지를 채우고 내일 다시 올게요!",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontSize = FortuneType.bodyMd,
+                        color = FortuneColors.textPrimary,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+                Box(Modifier.fillMaxWidth().height(1.dp).background(FortuneColors.cream300))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(onClick = onDismiss)
+                        .padding(vertical = 13.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        "알겠어요",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = FortuneColors.textPrimary,
+                    )
+                }
+            }
+        }
     }
 }
 
