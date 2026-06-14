@@ -263,9 +263,9 @@
 
 > 앱 아이콘 시안 확보 (2026-06-10): `App Icon.html`(iOS) · `App Icon - Android.html`(Android) — 선택안 D "운세 한 장"(해 + 리포트 카드). `screenshots/app-icon.png` 참고.
 
-- [ ] 앱 아이콘 리소스 적용
-  - [ ] Android — adaptive icon (foreground/background 분리, `App Icon - Android.html` 기준)
-  - [ ] iOS — AppIcon asset set (`App Icon.html` 기준)
+- [x] 앱 아이콘 리소스 적용 (2026-06-14)
+  - [x] Android — adaptive icon 적용 완료. 전경/배경 PNG(1024)를 `mipmap-{mdpi~xxxhdpi}/ic_launcher_foreground.png`·`ic_launcher_background.png` 5밀도로 리사이즈, `mipmap-anydpi-v26/ic_launcher*.xml`이 `@mipmap` 레이어 참조, 레거시 폴백(`ic_launcher.png`/`_round.png`)은 평탄화 아이콘(512)에서 생성. 기본 템플릿 vector(`drawable-v24/ic_launcher_foreground.xml`·`drawable/ic_launcher_background.xml`) 제거. Play Store 512 아이콘은 `androidApp/playstore/play-store-icon-512.png` 보관. `assembleDebug` 검증·APK 패키징 확인
+  - [x] iOS — `Assets.xcassets/AppIcon.appiconset/app-icon-1024.png`를 평탄화(알파 제거, App Store 요건) 1024 아이콘으로 교체. Contents.json 구조 불변(동일 파일명·치수). 최종 검증은 Xcode 아카이브 시 수행 권장
 - [ ] Android
   - [ ] 릴리즈 키스토어 생성
   - [ ] `build.gradle.kts` 릴리즈 서명 설정
