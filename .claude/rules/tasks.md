@@ -231,8 +231,8 @@
 - [x] androidApp: `KakaoSdk.init`·`KakaoAuthHolder` 연결, Manifest의 kakao queries·AuthCodeHandlerActivity, gradle kakao 의존성·`KAKAO_NATIVE_APP_KEY` 제거
 - [x] iosApp: `KakaoAuthBridgeImpl.swift`, `iOSApp.swift`의 KakaoSDK/onOpenURL/브리지 인자, `Info.plist` kakao 스킴, `Secrets.xcconfig` 키, Xcode SPM `kakao-ios-sdk`(pbxproj) 제거 + 카카오 핀 남은 `Package.resolved` 삭제(재생성)
 - [x] `libs.versions.toml`: kakao·firebase·supabase-auth·supabase-postgrest 제거 (supabase-functions 유지)
-- [x] DB 정리: `users`·`fortunes` DROP 마이그레이션 **원격 적용 완료** (`db push --linked`, 2026-06-14) — [ ] Supabase Auth 기존 카카오 사용자 정리는 대시보드에서 수동 수행 잔존 (`docs/followup-local-migration.md` §1.4)
-- [x] `local.properties`: `kakao.nativeAppKey` 제거 + **`supabase.secretKey` 제거 (secrets.md 위반 해소)** — 키 롤테이션은 대시보드에서 검토 (followup §1.5)
+- [x] DB 정리: `users`·`fortunes` DROP 마이그레이션 **원격 적용 완료** (`db push --linked`, 2026-06-14) — [x] Supabase Auth 기존 카카오 사용자 정리 대시보드 수동 완료 (2026-06-27, `docs/followup-local-migration.md` §1.4)
+- [x] `local.properties`: `kakao.nativeAppKey` 제거 + **`supabase.secretKey` 제거 (secrets.md 위반 해소)** — 키 롤테이션 대시보드 완료 (2026-06-27, followup §1.5)
 - [x] Android(`assembleDebug`) + iOS(시뮬레이터, BUILD SUCCEEDED) 빌드 검증 (2026-06-10)
 
 ### Task 8.7. 설정 화면 — 내 정보 · 알림 · 정보 초기화 (8.2 의존)

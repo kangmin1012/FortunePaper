@@ -260,7 +260,7 @@
 | 4 | 운세 리포트 생성 (Edge Function) | ✅ 완료 (v1.1에서 stateless 개편 예정) |
 | 5 | 리포트 화면 UI | ✅ 완료 |
 | 6 | ~~푸시 알림 (FCM + pg_cron)~~ | ⏸ 폐기 — Task 8.7(설정)·8.8(로컬 알림)로 대체 |
-| 8 | **로컬 전환 마이그레이션 (v1.1)** — DataStore·온보딩 전환·Edge Function 개편·카카오 제거·설정·로컬 알림 | ✅ 코드 + 원격 배포 완료 (2026-06-14: fortune 배포·스모크·테이블 DROP). Auth 사용자 정리·키 롤테이션(대시보드)만 잔존 → [`docs/followup-local-migration.md`](../../docs/followup-local-migration.md) |
+| 8 | **로컬 전환 마이그레이션 (v1.1)** — DataStore·온보딩 전환·Edge Function 개편·카카오 제거·설정·로컬 알림 | ✅ 완료 (2026-06-14: fortune 배포·스모크·테이블 DROP / 2026-06-27: Auth 사용자 정리·키 롤테이션 대시보드 완료) → [`docs/followup-local-migration.md`](../../docs/followup-local-migration.md) |
 | 7 | 배포 | ⬜ Task 8 잔여 원격 작업 완료 후 |
 
 전체 체크리스트 → [`.claude/rules/tasks.md`](tasks.md) 참조

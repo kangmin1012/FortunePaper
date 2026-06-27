@@ -9,7 +9,7 @@
 
 ## 1. 원격(Supabase) 작업
 
-> **✅ 1.1 · 1.2 · 1.3 완료 (2026-06-14).** 1.4 · 1.5는 대시보드 전용 작업으로 잔존.
+> **✅ 1.1~1.5 전부 완료** — 1.1·1.2·1.3 (2026-06-14), 1.4·1.5 (2026-06-27, 대시보드 수동 처리).
 
 ### 1.1 fortune Edge Function 배포 (stateless 개편본) — ✅ 완료 (2026-06-14)
 
@@ -42,15 +42,15 @@ supabase functions delete kakao-auth --project-ref zvqecylagvkznetltlpu
 
 마이그레이션 `supabase/migrations/20260610120000_drop_users_and_fortunes.sql`을 `supabase db push --linked`로 원격 적용. 마이그레이션 히스토리에 `20260610120000` 기록 확인, "Remote database is up to date".
 
-### 1.4 Supabase Auth 기존 사용자 정리 — ⬜ 대시보드 전용 (잔존)
+### 1.4 Supabase Auth 기존 사용자 정리 — ✅ 완료 (2026-06-27)
 
-대시보드 → Authentication → Users에서 기존 카카오 연동 사용자 삭제.
+대시보드 → Authentication → Users에서 기존 카카오 연동 사용자 삭제 완료.
 
-### 1.5 Secret Key 롤테이션 (보안)
+### 1.5 Secret Key 롤테이션 (보안) — ✅ 완료 (2026-06-27)
 
 `local.properties`에 저장돼 있던 `supabase.secretKey`(service_role)는 제거 완료.
-**키가 로컬 파일에 노출된 이력이 있으므로** 대시보드 → Settings → API에서 롤테이션을 권장한다.
-(현재 남은 서버 코드(fortune)는 service_role을 사용하지 않으므로 롤테이션해도 영향 없음)
+키가 로컬 파일에 노출된 이력이 있어 대시보드 → Settings → API에서 롤테이션 완료.
+(남은 서버 코드(fortune)는 service_role을 사용하지 않아 롤테이션 영향 없음)
 
 ---
 
@@ -75,6 +75,11 @@ supabase functions delete kakao-auth --project-ref zvqecylagvkznetltlpu
 
 ## 4. 기타 결정 기록
 
+- **레포 잔재 정리 완료 (2026-06-27)** — 빌드와 무관하게 남아있던 카카오 흔적 제거 + `assembleDebug` 빌드 검증(APK 생성 확인):
+  - `settings.gradle.kts`의 카카오 maven 저장소(`devrepo.kakao.com`) 제거
+  - 미사용 에셋 `shared/src/commonMain/composeResources/drawable/kakao_login_medium_wide.png` 삭제 (참조 코드 없음)
+  - `iosApp/Configuration/Secrets.xcconfig.example`의 `KAKAO_NATIVE_APP_KEY` 라인 제거
+  - (보류) `design/FortunePaper_Design/screens.jsx`에 미사용 `KakaoLoginButton`/`KakaoSymbol` 정의 잔존 — 디자인 시안 소스라 별도 정리 대상
 - **`supabase/functions/ping-db/`는 유지** — Free 플랜 일시정지 방지 heartbeat 용도로 users/fortunes 테이블을 사용하지 않는다. 단, DB의 `ping` RPC 함수에 의존하므로 테이블 DROP과 무관하게 동작한다. 불필요해지면 별도 삭제.
 - **iosApp의 SPM `Package.resolved`** — 카카오 핀이 남아 있어 삭제했다. Xcode에서 프로젝트를 열면 (kakao 패키지 참조가 pbxproj에서 제거된 상태로) 자동 재생성된다.
-- **카카오 개발자 콘솔** — 등록된 앱(네이티브 키 `37043b...`)은 더 이상 사용하지 않으므로 비활성화/삭제 가능 (선택).
+- **카카오 개발자 콘솔** — 등록된 앱(네이티브 키 `37043b...`)은 더 이상 사용하지 않아 비활성화/삭제 완료 (2026-06-27).
